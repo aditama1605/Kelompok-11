@@ -13,7 +13,7 @@ class LaporanPasienController extends Controller
     {
         return response()->json([
             'status' => true,
-            'message' => 'Semua laporan pasien',
+            'message' => 'Data semua laporan pasien',
             'data' => LaporanPasien::with(['jadwalTerapi', 'payment', 'panduanLatihan'])->get()
         ]);
     }
@@ -24,7 +24,7 @@ class LaporanPasienController extends Controller
             'keluhan_pasien' => 'required|string',
             'jadwal_terapi_id_jadwal_terapi' => 'required|exists:jadwal_terapi,id_jadwal_terapi',
             'payment_id_payment' => 'required|exists:payment,id_payment',
-            'panduan_latihan_id_panduan_latihan' => 'required|exists:panduan_latihan,id_panduan_latihan',
+            'panduan_latihan_id_panduan_latihan' => 'required|exists:panduan_latihans,id_panduan_latihan',
         ]);
 
         if ($validator->fails()) {
@@ -37,7 +37,7 @@ class LaporanPasienController extends Controller
             'status' => true,
             'message' => 'Laporan pasien berhasil ditambahkan',
             'data' => $laporan
-        ]);
+        ], 201);
     }
 
     public function show($id)
@@ -62,7 +62,7 @@ class LaporanPasienController extends Controller
             'keluhan_pasien' => 'sometimes|string',
             'jadwal_terapi_id_jadwal_terapi' => 'sometimes|exists:jadwal_terapi,id_jadwal_terapi',
             'payment_id_payment' => 'sometimes|exists:payment,id_payment',
-            'panduan_latihan_id_panduan_latihan' => 'sometimes|exists:panduan_latihan,id_panduan_latihan',
+            'panduan_latihan_id_panduan_latihan' => 'sometimes|exists:panduan_latihans,id_panduan_latihan',
         ]);
 
         if ($validator->fails()) {
@@ -90,4 +90,3 @@ class LaporanPasienController extends Controller
         return response()->json(['status' => true, 'message' => 'Laporan pasien berhasil dihapus']);
     }
 }
-

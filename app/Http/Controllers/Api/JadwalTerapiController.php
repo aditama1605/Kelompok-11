@@ -23,7 +23,8 @@ class JadwalTerapiController extends Controller
         $validator = Validator::make($request->all(), [
             'tanggal' => 'required|date',
             'jadwal_terapi' => 'required|date',
-            'terapis_id_terapis' => 'required|exists:terapis,id_terapis',
+            'terapis_id' => 'required|exists:terapis,id_terapis',
+            'user_id' => 'required|exists:users,iduser',
         ]);
 
         if ($validator->fails()) {
@@ -60,7 +61,8 @@ class JadwalTerapiController extends Controller
         $validator = Validator::make($request->all(), [
             'tanggal' => 'sometimes|date',
             'jadwal_terapi' => 'sometimes|date',
-            'terapis_id_terapis' => 'sometimes|exists:terapis,id_terapis',
+            'terapis_id' => 'sometimes|exists:terapis,id_terapis',
+            'user_id' => 'sometimes|exists:users,iduser',
         ]);
 
         if ($validator->fails()) {
@@ -88,4 +90,3 @@ class JadwalTerapiController extends Controller
         return response()->json(['status' => true, 'message' => 'Jadwal terapi berhasil dihapus']);
     }
 }
-

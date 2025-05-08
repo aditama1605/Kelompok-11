@@ -3,19 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LaporanPerkembangan extends Model
 {
+    protected $table = 'laporan_perkembangan';
     protected $primaryKey = 'id_laporan_perkembangan';
+    public $timestamps = true;
 
     protected $fillable = [
-        'keterangan_perkembangan',
-        'laporan_pasien_id_laporan_pasien',
+        'ringkasan_perkembangan',
+        'tanggal_laporan',
+        'laporan_pasiens_id_laporan_pasiens',
     ];
 
-    public function laporanPasien(): BelongsTo
+    protected $casts = [
+        'tanggal_laporan' => 'date',
+    ];
+
+    public function laporanPasien()
     {
-        return $this->belongsTo(LaporanPasien::class, 'laporan_pasien_id_laporan_pasien');
+        return $this->belongsTo(LaporanPasien::class, 'laporan_pasiens_id_laporan_pasiens', 'id_laporan_pasien');
     }
 }

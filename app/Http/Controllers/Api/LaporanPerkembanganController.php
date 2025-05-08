@@ -1,53 +1,90 @@
 <?php
 
-namespace App\Http\Controllers\api;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\LaporanPerkembangan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class LaporanPerkembanganController extends Controller
 {
     public function index()
     {
-        return response()->json(
-            LaporanPerkembangan::with('laporanPasien')->get()
-        );
+        return response()->json([
+            'status' => true,
+            'message' => 'Data semua laporan perkembangan',
+            'data' => LaporanPerkembangan::with('laporanPasien')->get()
+        ]);
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'keterangan_perkembangan' => 'required|string',
-            'laporan_pasien_id_laporan_pasien' => 'required|exists:laporan_pasiens,id_laporan_pasien',
+        $validator = Validator::make($request->all(), [
+            'ringkasan_perkembangan' => 'required|string',
+            'tanggal_laporan' => 'required|date',
+            'laporan_pasiens_id_laporan_pasiens' => 'required|exists:laporan_pasiens,id_laporan_pasien',
         ]);
 
-        $laporan = LaporanPerkembangan::create($data);
-        return response()->json($laporan, 201);
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $laporan = LaporanPerkembangan::create($request->all());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Laporan perkembangan berhasil ditambahkan',
+            'data' => $laporan
+        ], 201);
     }
 
     public function show($id)
     {
-        $laporan = LaporanPerkembangan::with('laporanPasien')->findOrFail($id);
-        return response()->json($laporan);
+        $laporan = LaporanPerkembangan::with('laporanPasien')->find($id);
+
+        if (!$laporan) {
+            return response()->json(['status' => false, 'message' => 'Data tidak ditemukan'], 404);
+        }
+
+        return response()->json(['status' => true, 'data' => $laporan]);
     }
 
     public function update(Request $request, $id)
     {
-        $laporan = LaporanPerkembangan::findOrFail($id);
+        $laporan = LaporanPerkembangan::find($id);
+        if (!$laporan) {
+            return response()->json(['status' => false, 'message' => 'Data tidak ditemukan'], 404);
+        }
 
-        $data = $request->validate([
-            'keterangan_perkembangan' => 'sometimes|string',
-            'laporan_pasien_id_laporan_pasien' => 'sometimes|exists:laporan_pasiens,id_laporan_pasien',
+        $validator = Validator::make($request->all(), [
+            'ringkasan_perkembangan' => 'sometimes|string',
+            'tanggal_laporan' => 'sometimes|date',
+            'laporan_pasiens_id_laporan_pasiens' => 'sometimes|exists:laporan_pasiens,id_laporan_pasien',
         ]);
 
-        $laporan->update($data);
-        return response()->json($laporan);
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $laporan->update($request->all());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Laporan perkembangan berhasil diperbarui',
+            'data' => $laporan
+        ]);
     }
 
     public function destroy($id)
     {
-        LaporanPerkembangan::findOrFail($id)->delete();
-        return response()->json(['message' => 'Laporan perkembangan berhasil dihapus.']);
+        $laporan = LaporanPerkembangan::find($id);
+        if (!$laporan) {
+            return response()->json(['status' => false, 'message' => 'Data tidak ditemukan'], 404);
+        }
+
+        $laporan->delete();
+
+        return response()->json(['status' => true, 'message' => 'Laporan perkembangan berhasil dihapus']);
     }
 }

@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\TerapisController;
 use App\Http\Controllers\Api\JadwalTerapiController;
-use App\Http\Controllers\api\PanduanLatihanController;
+use App\Http\Controllers\Api\PanduanLatihanController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\LaporanPasienController;
 use App\Http\Controllers\api\LaporanPerkembanganController;
