@@ -7,9 +7,7 @@ use App\Http\Controllers\Api\TerapisController;
 use App\Http\Controllers\Api\JadwalTerapiController;
 use App\Http\Controllers\api\PanduanLatihanController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+
 
 
 Route::apiResource('payment', PaymentController::class);
