@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\TerapisController;
 use App\Http\Controllers\Api\JadwalTerapiController;
 use App\Http\Controllers\api\PanduanLatihanController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\LaporanPasienController;
+use App\Http\Controllers\Api\LaporanPasienController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -29,4 +29,5 @@ Route::prefix('user')->group(function () {
 });
 
 Route::apiResource('laporan-pasien', LaporanPasienController::class);
+
 
