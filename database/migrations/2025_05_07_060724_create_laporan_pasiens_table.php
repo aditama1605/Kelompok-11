@@ -26,7 +26,7 @@ return new class extends Migration
                   ->references('id_payment')->on('payment')->onDelete('cascade');
 
             $table->foreign('panduan_latihan_id_panduan_latihan')
-                  ->references('id_panduan_latihan')->on('panduan_latihan')->onDelete('cascade');
+                  ->references('id_panduan_latihan')->on('panduan_latihans')->onDelete('cascade');
         });
     }
 

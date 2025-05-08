@@ -16,7 +16,7 @@ return new class extends Migration
             $table->text('ringkasan_perkembangan');
             $table->date('tanggal_laporan');
             $table->unsignedBigInteger('laporan_pasiens_id_laporan_pasiens');
-            $table->foreign('laporan_pasiens_id_laporan_pasiens')->references('id_laporan_pasiens')->on('laporan_pasiens');
+            $table->foreign('laporan_pasiens_id_laporan_pasiens')->references('id_laporan_pasien')->on('laporan_pasiens');
             $table->timestamps();
 
             
