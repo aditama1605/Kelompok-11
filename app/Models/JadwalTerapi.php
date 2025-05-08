@@ -22,5 +22,10 @@ class JadwalTerapi extends Model
     {
         return $this->belongsTo(Terapis::class, 'terapis_id_terapis');
     }
+
+    public function user()
+{
+    return $this->belongsTo(User::class, 'user_iduser');
+}
 }
 

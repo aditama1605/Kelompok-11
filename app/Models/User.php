@@ -21,8 +21,5 @@ class User extends Authenticatable
         'password',
     ];
 
-    public function jadwalTerapi(): BelongsTo
-    {
-        return $this->belongsTo(JadwalTerapi::class, 'jadwal_terapi_id_jadwal_terapi');
-    }
+
 }
