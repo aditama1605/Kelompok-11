@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\JadwalTerapiController;
 use App\Http\Controllers\api\PanduanLatihanController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\LaporanPasienController;
+use App\Http\Controllers\api\LaporanPerkembanganController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -29,5 +30,6 @@ Route::prefix('user')->group(function () {
 });
 
 Route::apiResource('laporan-pasien', LaporanPasienController::class);
+Route::apiResource('laporan-perkembangan', LaporanPerkembanganController::class);
 
 

@@ -1,56 +1,53 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\api;
 
+use App\Http\Controllers\Controller;
 use App\Models\LaporanPerkembangan;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class LaporanPerkembanganController extends Controller
 {
-    // Mendapatkan semua laporan perkembangan
     public function index()
     {
-        return response()->json(LaporanPerkembangan::all());
+        return response()->json(
+            LaporanPerkembangan::with('laporanPasien')->get()
+        );
     }
 
-    // Mendapatkan laporan perkembangan berdasarkan ID
-    public function show($id)
-    {
-        $laporanPerkembangan = LaporanPerkembangan::find($id);
-
-        if (!$laporanPerkembangan) {
-            return response()->json(['message' => 'Data tidak ditemukan'], 404);
-        }
-
-        return response()->json($laporanPerkembangan);
-    }
-
-    // Menyimpan laporan perkembangan baru
     public function store(Request $request)
     {
-        $request->validate([
-            'ringkasan_perkembangan' => 'required',
-            'tanggal_laporan' => 'required|date',
-            'laporan_pasiens_id_laporan_pasiens' => 'required|exists:laporan_pasiens,id_laporan_pasiens'
+        $data = $request->validate([
+            'keterangan_perkembangan' => 'required|string',
+            'laporan_pasien_id_laporan_pasien' => 'required|exists:laporan_pasiens,id_laporan_pasien',
         ]);
 
-        $laporanPerkembangan = LaporanPerkembangan::create($request->all());
-        return response()->json($laporanPerkembangan, 201);
+        $laporan = LaporanPerkembangan::create($data);
+        return response()->json($laporan, 201);
     }
 
-    // Memperbarui laporan perkembangan
+    public function show($id)
+    {
+        $laporan = LaporanPerkembangan::with('laporanPasien')->findOrFail($id);
+        return response()->json($laporan);
+    }
+
     public function update(Request $request, $id)
     {
-        $laporanPerkembangan = LaporanPerkembangan::findOrFail($id);
-        $laporanPerkembangan->update($request->all());
-        return response()->json($laporanPerkembangan, 200);
+        $laporan = LaporanPerkembangan::findOrFail($id);
+
+        $data = $request->validate([
+            'keterangan_perkembangan' => 'sometimes|string',
+            'laporan_pasien_id_laporan_pasien' => 'sometimes|exists:laporan_pasiens,id_laporan_pasien',
+        ]);
+
+        $laporan->update($data);
+        return response()->json($laporan);
     }
 
-    // Menghapus laporan perkembangan
     public function destroy($id)
     {
-        LaporanPerkembangan::destroy($id);
-        return response()->json(null, 204);
+        LaporanPerkembangan::findOrFail($id)->delete();
+        return response()->json(['message' => 'Laporan perkembangan berhasil dihapus.']);
     }
 }
