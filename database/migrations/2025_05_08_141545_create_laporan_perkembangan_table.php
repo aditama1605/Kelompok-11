@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('laporan_perkembangan', function (Blueprint $table) {
             $table->id('id_laporan_perkembangan');
@@ -18,8 +18,6 @@ return new class extends Migration
             $table->unsignedBigInteger('laporan_pasiens_id_laporan_pasiens');
             $table->foreign('laporan_pasiens_id_laporan_pasiens')->references('id_laporan_pasien')->on('laporan_pasiens');
             $table->timestamps();
-
-            
         });
     }
 

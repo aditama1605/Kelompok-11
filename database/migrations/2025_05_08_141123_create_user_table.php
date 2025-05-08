@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user', function (Blueprint $table) {
-               $table->id('iduser');
-                $table->string('nama', 255);
-                $table->string('email', 255)->unique();
-                $table->string('password', 100);
-                $table->enum('role', ['pasien', 'terapis']);
-                $table->timestamps(); // Tetap disimpan untuk created_at dan updated_at
+            $table->id('iduser');
+            $table->string('nama', 255);
+            $table->string('email', 255)->unique();
+            $table->string('password', 100);
+            $table->enum('role', ['pasien', 'terapis']);
+            $table->timestamps();
         });
     }
 
