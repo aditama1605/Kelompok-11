@@ -2,24 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable
+class User extends Model
 {
+    protected $table = 'users'; // Optional, Laravel default-nya 'users'
     protected $primaryKey = 'iduser';
+    public $timestamps = false;
 
-    protected $fillable = [
-        'nama',
-        'email',
-        'password',
-        'role',
-        'jadwal_terapi_id_jadwal_terapi',
-    ];
+    protected $fillable = ['nama', 'email', 'password', 'role'];
 
-    protected $hidden = [
-        'password',
-    ];
-
-
+    protected $hidden = ['password'];
 }

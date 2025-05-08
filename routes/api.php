@@ -14,21 +14,12 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-
-
 Route::apiResource('payment', PaymentController::class);
 Route::apiResource('terapis', TerapisController::class);
 Route::apiResource('jadwal-terapi', JadwalTerapiController::class);
 Route::apiResource('panduan-latihan', PanduanLatihanController::class);
 
-Route::prefix('user')->group(function () {
-    Route::get('/', [UserController::class, 'index']);
-    Route::post('/', [UserController::class, 'store']);
-    Route::get('/{id}', [UserController::class, 'show']);
-    Route::put('/{id}', [UserController::class, 'update']);
-    Route::delete('/{id}', [UserController::class, 'destroy']);
-});
-
+Route::apiResource('users', UserController::class);
 Route::apiResource('laporan-pasien', LaporanPasienController::class);
 Route::apiResource('laporan-perkembangan', LaporanPerkembanganController::class);
 

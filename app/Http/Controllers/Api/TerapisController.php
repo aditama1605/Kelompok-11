@@ -9,79 +9,58 @@ use Illuminate\Support\Facades\Validator;
 
 class TerapisController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        return response()->json([
-            'status' => true,
-            'message' => 'Data semua terapis',
-            'data' => Terapis::with(['jadwalTerapi', 'panduanLatihan'])->get()
-        ]);
+        $terapis = Terapis::all();
+        return response()->json($terapis);
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'tanggal_mulai' => 'nullable|date',
+        $validatedData = $request->validate([
+            'tanggal_mulai' => 'required|date',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
-        }
-
-        $terapis = Terapis::create($request->all());
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Terapis berhasil ditambahkan',
-            'data' => $terapis
-        ]);
+        $terapis = Terapis::create($validatedData);
+        return response()->json($terapis, 201);
     }
 
+    /**
+     * Display the specified resource.
+     */
     public function show($id)
     {
-        $terapis = Terapis::with(['jadwalTerapi', 'panduanLatihan'])->find($id);
-
-        if (!$terapis) {
-            return response()->json(['status' => false, 'message' => 'Data tidak ditemukan'], 404);
-        }
-
-        return response()->json(['status' => true, 'data' => $terapis]);
+        $terapis = Terapis::findOrFail($id);
+        return response()->json($terapis);
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, $id)
     {
-        $terapis = Terapis::find($id);
-        if (!$terapis) {
-            return response()->json(['status' => false, 'message' => 'Data tidak ditemukan'], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'tanggal_mulai' => 'nullable|date',
+        $validatedData = $request->validate([
+            'tanggal_mulai' => 'required|date',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
-        }
-
-        $terapis->update($request->all());
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Terapis berhasil diperbarui',
-            'data' => $terapis
-        ]);
+        $terapis = Terapis::findOrFail($id);
+        $terapis->update($validatedData);
+        return response()->json($terapis);
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy($id)
     {
-        $terapis = Terapis::find($id);
-        if (!$terapis) {
-            return response()->json(['status' => false, 'message' => 'Data tidak ditemukan'], 404);
-        }
-
+        $terapis = Terapis::findOrFail($id);
         $terapis->delete();
-
-        return response()->json(['status' => true, 'message' => 'Terapis berhasil dihapus']);
+        return response()->json(null, 204);
     }
 }
-

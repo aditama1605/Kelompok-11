@@ -14,13 +14,14 @@ return new class extends Migration
         Schema::create('jadwal_terapi', function (Blueprint $table) {
             $table->id('id_jadwal_terapi');
             $table->date('tanggal')->nullable();
-            $table->date('jadwal_terapi')->nullable(); // opsional: ubah ke 'datetime' jika perlu jam
-            $table->unsignedBigInteger('terapis_id_terapis');
-            $table->unsignedBigInteger('user_iduser');
+            $table->dateTime('jadwal_terapi')->nullable(); // Changed to datetime for full date and time
+            $table->unsignedBigInteger('terapis_id'); // Renamed for consistency
+            $table->unsignedBigInteger('user_id'); // Renamed for consistency
             $table->timestamps();
 
-            $table->foreign('terapis_id_terapis')->references('id_terapis')->on('terapis')->onDelete('cascade');
-            $table->foreign('user_iduser')->references('iduser')->on('user')->onDelete('cascade');
+            // Foreign Key Constraints
+            $table->foreign('terapis_id')->references('id_terapis')->on('terapis')->onDelete('cascade');
+            $table->foreign('user_id')->references('iduser')->on('users')->onDelete('cascade');
         });
     }
 
