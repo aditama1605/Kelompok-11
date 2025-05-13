@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Terapis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class TerapisController extends Controller
 {
@@ -14,8 +15,11 @@ class TerapisController extends Controller
      */
     public function index()
     {
-        $terapis = Terapis::all();
-        return response()->json($terapis);
+        return response()->json([
+            'status' => true,
+            'message' => 'Data semua terapis',
+            'data' => Terapis::all()
+        ], 200);
     }
 
     /**
@@ -23,12 +27,35 @@ class TerapisController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
+        $validator = Validator::make($request->all(), [
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email|unique:terapis,email',
             'tanggal_mulai' => 'required|date',
         ]);
 
-        $terapis = Terapis::create($validatedData);
-        return response()->json($terapis, 201);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $terapis = Terapis::create($request->all());
+            return response()->json([
+                'status' => true,
+                'message' => 'Terapis berhasil ditambahkan',
+                'data' => $terapis
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Gagal menambahkan terapis: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal menambahkan terapis',
+                'errors' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -36,8 +63,20 @@ class TerapisController extends Controller
      */
     public function show($id)
     {
-        $terapis = Terapis::findOrFail($id);
-        return response()->json($terapis);
+        $terapis = Terapis::find($id);
+
+        if (!$terapis) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Data terapis tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Data terapis',
+            'data' => $terapis
+        ], 200);
     }
 
     /**
@@ -45,13 +84,45 @@ class TerapisController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'tanggal_mulai' => 'required|date',
+        $terapis = Terapis::find($id);
+
+        if (!$terapis) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Data terapis tidak ditemukan'
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'nama' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:terapis,email,' . $id . ',id_terapis',
+            'tanggal_mulai' => 'sometimes|date',
         ]);
 
-        $terapis = Terapis::findOrFail($id);
-        $terapis->update($validatedData);
-        return response()->json($terapis);
+        if ($validator->fails()) {
+            Log::error('Validasi gagal saat memperbarui terapis ID ' . $id . ': ' . json_encode($validator->errors()));
+            return response()->json([
+                'status' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $terapis->update($request->all());
+            return response()->json([
+                'status' => true,
+                'message' => 'Terapis berhasil diperbarui',
+                'data' => $terapis
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Gagal memperbarui terapis ID ' . $id . ': ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal memperbarui terapis',
+                'errors' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -59,8 +130,28 @@ class TerapisController extends Controller
      */
     public function destroy($id)
     {
-        $terapis = Terapis::findOrFail($id);
-        $terapis->delete();
-        return response()->json(null, 204);
+        $terapis = Terapis::find($id);
+
+        if (!$terapis) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Data terapis tidak ditemukan'
+            ], 404);
+        }
+
+        try {
+            $terapis->delete();
+            return response()->json([
+                'status' => true,
+                'message' => 'Terapis berhasil dihapus'
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Gagal menghapus terapis ID ' . $id . ': ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal menghapus terapis',
+                'errors' => $e->getMessage()
+            ], 500);
+        }
     }
 }

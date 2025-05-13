@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\LaporanPasienController;
 use App\Http\Controllers\api\LaporanPerkembanganController;
 
+use App\Http\Controllers\AuthController;
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -23,4 +25,9 @@ Route::apiResource('users', UserController::class);
 Route::apiResource('laporan-pasien', LaporanPasienController::class);
 Route::apiResource('laporan-perkembangan', LaporanPerkembanganController::class);
 
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login',    [AuthController::class, 'login']);
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
