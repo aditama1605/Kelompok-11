@@ -11,6 +11,7 @@ return new class extends Migration {
             $table->string('status_payment', 45);
             $table->decimal('nominal_payment', 10, 2);
             $table->date('tanggal_payment');
+            $table->string('bukti_pembayaran'); // filegambar
             $table->timestamps();
         });
     }

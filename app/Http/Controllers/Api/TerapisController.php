@@ -28,8 +28,6 @@ class TerapisController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nama' => 'required|string|max:255',
-            'email' => 'required|email|unique:terapis,email',
             'tanggal_mulai' => 'required|date',
         ]);
 
@@ -94,8 +92,6 @@ class TerapisController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'nama' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:terapis,email,' . $id . ',id_terapis',
             'tanggal_mulai' => 'sometimes|date',
         ]);
 

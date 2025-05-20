@@ -16,18 +16,32 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::apiResource('payment', PaymentController::class);
-Route::apiResource('terapis', TerapisController::class);
-Route::apiResource('jadwal-terapi', JadwalTerapiController::class);
-Route::apiResource('panduan-latihan', PanduanLatihanController::class);
-
-Route::apiResource('users', UserController::class);
-Route::apiResource('laporan-pasien', LaporanPasienController::class);
-Route::apiResource('laporan-perkembangan', LaporanPerkembanganController::class);
+// Route::apiResource('payment', PaymentController::class);
+// Route::apiResource('terapis', TerapisController::class);
+// Route::apiResource('jadwal-terapi', JadwalTerapiController::class);
+// Route::apiResource('panduan-latihan', PanduanLatihanController::class);
+// Route::apiResource('users', UserController::class);
+// Route::apiResource('laporan-pasien', LaporanPasienController::class);
+// Route::apiResource('laporan-perkembangan', LaporanPerkembanganController::class);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+});
+
+Route::middleware(['auth:sanctum', 'role:pasien'])->group(function () {
+    Route::apiResource('payment', PaymentController::class);
+    Route::apiResource('jadwal-terapi', JadwalTerapiController::class);
+    Route::apiResource('laporan-pasien', LaporanPasienController::class);
+    Route::apiResource('laporan-perkembangan', LaporanPerkembanganController::class);
+});
+
+Route::middleware(['auth:sanctum', 'role:terapis'])->group(function () {
+    Route::apiResource('payment', PaymentController::class);
+    Route::apiResource('terapis', TerapisController::class);
+    Route::apiResource('panduan-latihan', PanduanLatihanController::class);
+    Route::apiResource('users', UserController::class);
+    Route::apiResource('laporan-pasien', LaporanPasienController::class);
 });

@@ -15,6 +15,8 @@ class JadwalTerapi extends Model
         'jadwal_terapi',
         'terapis_id',
         'user_id',
+        'jenis_layanan', // pakai tanda kutip karena ada spasi
+        'alamat',
     ];
 
     protected $casts = [
@@ -25,5 +27,10 @@ class JadwalTerapi extends Model
     public function terapis()
     {
         return $this->belongsTo(Terapis::class, 'terapis_id', 'id_terapis');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'iduser');
     }
 }

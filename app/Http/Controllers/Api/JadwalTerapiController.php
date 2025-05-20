@@ -14,7 +14,7 @@ class JadwalTerapiController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Data semua jadwal terapi',
-            'data' => JadwalTerapi::with('terapis')->get()
+            'data' => JadwalTerapi::with(['terapis', 'user'])->get()
         ]);
     }
 
@@ -25,6 +25,8 @@ class JadwalTerapiController extends Controller
             'jadwal_terapi' => 'required|date',
             'terapis_id' => 'required|exists:terapis,id_terapis',
             'user_id' => 'required|exists:users,iduser',
+            'jenis_layanan' => 'required|in:Home Visit,OnWeb',
+            'alamat' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -42,7 +44,7 @@ class JadwalTerapiController extends Controller
 
     public function show($id)
     {
-        $jadwal = JadwalTerapi::with('terapis')->find($id);
+        $jadwal = JadwalTerapi::with(['terapis', 'user'])->find($id);
 
         if (!$jadwal) {
             return response()->json(['status' => false, 'message' => 'Data tidak ditemukan'], 404);
@@ -63,6 +65,8 @@ class JadwalTerapiController extends Controller
             'jadwal_terapi' => 'sometimes|date',
             'terapis_id' => 'sometimes|exists:terapis,id_terapis',
             'user_id' => 'sometimes|exists:users,iduser',
+            'jenis_layanan' => 'sometimes|in:Home Visit,OnWeb',
+            'alamat' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {

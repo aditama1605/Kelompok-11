@@ -16,6 +16,6 @@ class Payment extends Model
         'status_payment',
         'nominal_payment',
         'tanggal_payment',
+        'bukti_pembayaran',
     ];
 }
-

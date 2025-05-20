@@ -4,22 +4,23 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUsersTable extends Migration
+return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id('iduser'); // Primary key: "id"
-            $table->string('nama'); // Nama lengkap user
-            $table->string('email')->unique(); // Email harus unik
-            $table->string('password'); // Password yang dienkripsi
-            $table->enum('role', ['pasien', 'terapis']); // Role: pasien atau terapis
-            $table->timestamps(); // created_at dan updated_at
+            $table->id('iduser'); // Primary key
+            $table->string('nama');
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->enum('role', ['pasien', 'terapis']);
+            $table->rememberToken(); // Untuk "remember me" jika pakai UI auth nanti
+            $table->timestamps();
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('users');
     }
-}
+};

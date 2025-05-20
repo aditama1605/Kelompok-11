@@ -24,7 +24,8 @@ class PaymentController extends Controller
         $validator = Validator::make($request->all(), [
             'status_payment' => 'required|string|max:45',
             'nominal_payment' => 'required|numeric|min:0',
-            'tanggal_payment' => 'required|date'
+            'tanggal_payment' => 'required|date',
+            'bukti_pembayaran' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // max 2MB
         ]);
 
         if ($validator->fails()) {
@@ -32,14 +33,26 @@ class PaymentController extends Controller
         }
 
         try {
-            $payment = Payment::create($request->all());
+            // Simpan file gambar ke public/bukti_pembayaran
+            if ($request->hasFile('bukti_pembayaran')) {
+                $file = $request->file('bukti_pembayaran');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('bukti_pembayaran'), $filename);
+            }
+
+            $payment = Payment::create([
+                'status_payment' => $request->status_payment,
+                'nominal_payment' => $request->nominal_payment,
+                'tanggal_payment' => $request->tanggal_payment,
+                'bukti_pembayaran' => $filename ?? null,
+            ]);
+
             return response()->json([
                 'status' => true,
                 'message' => 'Payment berhasil ditambahkan',
                 'data' => $payment
             ], 201);
         } catch (\Exception $e) {
-            Log::error('Gagal membuat payment: ' . $e->getMessage());
             return response()->json([
                 'status' => false,
                 'message' => 'Gagal menambahkan payment',
@@ -72,23 +85,32 @@ class PaymentController extends Controller
         $validator = Validator::make($request->all(), [
             'status_payment' => 'sometimes|string|max:45',
             'nominal_payment' => 'sometimes|numeric|min:0',
-            'tanggal_payment' => 'sometimes|date'
+            'tanggal_payment' => 'sometimes|date',
+            'bukti_pembayaran' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
-            Log::error('Validasi gagal saat memperbarui payment ID ' . $id . ': ' . json_encode($validator->errors()));
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
 
         try {
-            $payment->update($request->all());
+            $data = $request->only(['status_payment', 'nominal_payment', 'tanggal_payment']);
+
+            if ($request->hasFile('bukti_pembayaran')) {
+                $file = $request->file('bukti_pembayaran');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('bukti_pembayaran'), $filename);
+                $data['bukti_pembayaran'] = $filename;
+            }
+
+            $payment->update($data);
+
             return response()->json([
                 'status' => true,
                 'message' => 'Payment berhasil diperbarui',
                 'data' => $payment
             ], 200);
         } catch (\Exception $e) {
-            Log::error('Gagal memperbarui payment ID ' . $id . ': ' . $e->getMessage());
             return response()->json([
                 'status' => false,
                 'message' => 'Gagal memperbarui payment',

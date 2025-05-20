@@ -17,6 +17,8 @@ return new class extends Migration
             $table->dateTime('jadwal_terapi')->nullable(); // Changed to datetime for full date and time
             $table->unsignedBigInteger('terapis_id'); // Renamed for consistency
             $table->unsignedBigInteger('user_id'); // Renamed for consistency
+            $table->enum('jenis_layanan', ['Home Visit', 'OnWeb']);
+            $table->longText('alamat')->nullable();
             $table->timestamps();
 
             // Foreign Key Constraints
