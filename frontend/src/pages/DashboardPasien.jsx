@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { Link } from "react-router-dom";
 
 export default function DashboardPasien() {
   const navigate = useNavigate();
@@ -184,12 +185,16 @@ export default function DashboardPasien() {
                 Selamat datang, <span className="font-semibold text-rose-600">{nama}</span>!
               </p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 text-sm font-medium text-rose-600 hover:text-rose-700 border border-rose-200 hover:border-rose-300 rounded-md transition"
+
+
+            
+            <Link
+              to="/edit-profil"
+              className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded"
             >
-              Logout
-            </button>
+              Edit Profil
+            </Link>
+
           </div>
 
           {/* Content Grid */}
