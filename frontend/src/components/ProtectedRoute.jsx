@@ -1,20 +1,18 @@
-import React from "react";
 import { Navigate } from "react-router-dom";
 
-export default function ProtectedRoute({ children, allowedRole }) {
+const ProtectedRoute = ({ children, allowedRoles }) => {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
   if (!token) {
-    // Belum login, redirect ke halaman utama/login
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
 
-  if (allowedRole && role !== allowedRole) {
-    // Role tidak sesuai, redirect ke halaman utama/login
-    return <Navigate to="/" replace />;
+  if (allowedRoles && !allowedRoles.includes(role)) {
+    return <Navigate to="/login" replace />;
   }
 
-  // Sudah login dan role sesuai
   return children;
-}
+};
+
+export default ProtectedRoute;

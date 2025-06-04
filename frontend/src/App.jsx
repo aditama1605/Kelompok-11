@@ -6,35 +6,43 @@ import RegisterTerapis from "./components/RegisterTerapis.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import DashboardPasien from "./pages/DashboardPasien.jsx";
 import DashboardTerapis from "./pages/DashboardTerapis.jsx";
+import DashboardAdmin from "./pages/DashboardAdmin.jsx";
 
-
-   export default function App() {
-     return (
-       <BrowserRouter>
-         <div className="app">
-           <Routes>
-             <Route path="/" element={<HomePage />} />
-             <Route path="/login" element={<LoginForm />} />
-             <Route path="/register-pasien" element={<RegisterPasien />} />
-             <Route path="/register-terapis" element={<RegisterTerapis />} />
-             <Route
-               path="/dashboard-terapis"
-               element={
-                 <ProtectedRoute allowedRole="terapis">
-                   <DashboardTerapis />
-                 </ProtectedRoute>
-               }
-             />
-             <Route
-               path="/dashboard-pasien"
-               element={
-                 <ProtectedRoute allowedRole="pasien">
-                   <DashboardPasien />
-                 </ProtectedRoute>
-               }
-             />
-           </Routes>
-         </div>
-       </BrowserRouter>
-     );
-   }
+export default function App() {
+  return (
+    <BrowserRouter>
+      <div className="app">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register-pasien" element={<RegisterPasien />} />
+          <Route path="/register-terapis" element={<RegisterTerapis />} />
+          <Route
+            path="/dashboard-admin"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <DashboardAdmin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard-terapis"
+            element={
+              <ProtectedRoute allowedRoles={["terapis"]}>
+                <DashboardTerapis />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard-pasien"
+            element={
+              <ProtectedRoute allowedRoles={["pasien"]}>
+                <DashboardPasien />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
+}

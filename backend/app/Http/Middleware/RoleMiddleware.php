@@ -15,26 +15,7 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, ...$roles)
     {
-        // // Pastikan user sudah login (authenticated via JWT)
-        // if (!Auth::guard('api')->check()) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Unauthorized. Please login first.',
-        //     ], 401);
-        // }
 
-        // $user = Auth::guard('api')->user();
-
-        // // Periksa role
-        // if (!in_array($user->role, $roles)) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Forbidden. You do not have the right role.',
-        //     ], 403);
-        // }
-
-        // return $next($request);
-        
         try {
             $user = JWTAuth::parseToken()->authenticate();
             if (!in_array($user->role, $roles)) {

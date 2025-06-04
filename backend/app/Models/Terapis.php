@@ -10,18 +10,13 @@ class Terapis extends Model
     use HasFactory;
 
     protected $primaryKey = 'id_terapis';
-    protected $table = 'terapis';
 
     protected $fillable = [
-        'nama', // Added nama
-        'spesialisasi',
-        'foto',
-        'tanggal_mulai',
+        'iduser', 'spesialisasi', 'foto',
     ];
 
-    protected $casts = [
-        'tanggal_mulai' => 'date',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'iduser', 'iduser');
+    }
 }

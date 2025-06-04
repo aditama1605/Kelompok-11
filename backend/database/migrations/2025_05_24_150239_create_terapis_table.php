@@ -6,25 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('terapis', function (Blueprint $table) {
             $table->id('id_terapis');
+            $table->unsignedBigInteger('iduser');
+            $table->foreign('iduser')->references('iduser')->on('users')->onDelete('cascade');
             $table->string('spesialisasi')->nullable();
             $table->string('foto')->nullable();
-            $table->date('tanggal_mulai')->nullable(); // Added missing column
             $table->timestamps();
-
-            $table->index('tanggal_mulai');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('terapis');

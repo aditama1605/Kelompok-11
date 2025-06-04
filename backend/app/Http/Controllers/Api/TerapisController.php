@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Terapis;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
@@ -15,16 +17,22 @@ class TerapisController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $terapis = Terapis::all();
+            $terapis = Terapis::with('user')->get();
+            $terapis->map(function ($item) {
+                if ($item->foto) {
+                    $item->file_url = asset('storage/' . $item->foto);
+                }
+                return $item;
+            });
             return response()->json([
                 'status' => 'success',
                 'data' => $terapis,
-                'message' => 'Terapis list retrieved successfully',
+                'message' => 'Daftar terapis berhasil diambil',
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to retrieve terapis list',
+                'message' => 'Gagal mengambil daftar terapis',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -32,67 +40,75 @@ class TerapisController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'nama' => 'required|string|max:255',
-                'spesialisasi' => 'nullable|string|max:255',
-                'foto' => 'nullable|image|max:2048',
-                'tanggal_mulai' => 'nullable|date',
-            ]);
+        $validator = Validator::make($request->all(), [
+            'nama' => 'required|string|max:255', // Untuk users table
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8',
+            'spesialisasi' => 'nullable|string|max:255',
+            'foto' => 'nullable|image|max:4048',
+        ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
-
-            $data = $request->only(['nama', 'spesialisasi', 'tanggal_mulai']);
-
-            if ($request->hasFile('foto')) {
-                $file = $request->file('foto');
-                $timestamp = now()->format('YmdHis');
-                $extension = $file->getClientOriginalExtension();
-                $filename = "fototerapis_{$timestamp}.{$extension}";
-                $data['foto'] = $file->storeAs('terapis_photos', $filename, 'public');
-            }
-
-            $terapis = Terapis::create($data);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Terapis created successfully',
-                'data' => $terapis,
-                'file_url' => $terapis->foto ? asset('storage/' . $terapis->foto) : null,
-            ], 201);
-        } catch (\Exception $e) {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to create terapis',
-                'error' => $e->getMessage(),
-            ], 500);
+                'errors' => $validator->errors(),
+            ], 422);
         }
+
+        // Buat akun user terlebih dahulu
+        $user = User::create([
+            'nama' => $request->nama,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'terapis',
+        ]);
+
+        // Buat data terapis
+        $data = $request->only(['spesialisasi']);
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $timestamp = now()->format('YmdHis');
+            $extension = $file->getClientOriginalExtension();
+            $filename = "fototerapis_{$timestamp}.{$extension}";
+            $data['foto'] = $file->storeAs('terapis_photos', $filename, 'public');
+        }
+
+        $terapis = Terapis::create(array_merge($data, ['iduser' => $user->iduser]));
+
+        // Tambahkan file_url dan muat relasi user
+        if ($terapis->foto) {
+            $terapis->file_url = asset('storage/' . $terapis->foto);
+        }
+        $terapis->load('user');
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Terapis dan akun berhasil dibuat',
+            'data' => $terapis,
+        ], 201);
     }
 
     public function show(int $id): JsonResponse
     {
         try {
-            $terapis = Terapis::findOrFail($id);
+            $terapis = Terapis::with('user')->findOrFail($id);
+            if ($terapis->foto) {
+                $terapis->file_url = asset('storage/' . $terapis->foto);
+            }
             return response()->json([
                 'status' => 'success',
                 'data' => $terapis,
-                'file_url' => $terapis->foto ? asset('storage/' . $terapis->foto) : null,
-                'message' => 'Terapis retrieved successfully',
+                'message' => 'Terapis berhasil diambil',
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terapis not found',
+                'message' => 'Terapis tidak ditemukan',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to retrieve terapis',
+                'message' => 'Gagal mengambil terapis',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -102,12 +118,14 @@ class TerapisController extends Controller
     {
         try {
             $terapis = Terapis::findOrFail($id);
+            $user = User::findOrFail($terapis->iduser);
 
             $validator = Validator::make($request->all(), [
-                'nama' => 'sometimes|required|string|max:255',
-                'spesialisasi' => 'sometimes|required|string|max:255',
+                'nama' => 'sometimes|string|max:255', // Untuk users table
+                'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->iduser . ',iduser',
+                'password' => 'sometimes|string|min:8',
+                'spesialisasi' => 'sometimes|string|max:255',
                 'foto' => 'nullable|image|max:2048',
-                'tanggal_mulai' => 'sometimes|required|date',
             ]);
 
             if ($validator->fails()) {
@@ -117,8 +135,15 @@ class TerapisController extends Controller
                 ], 422);
             }
 
-            $data = $request->only(['nama', 'spesialisasi', 'tanggal_mulai']);
+            // Perbarui data user
+            $userData = [];
+            if ($request->has('nama')) $userData['nama'] = $request->nama;
+            if ($request->has('email')) $userData['email'] = $request->email;
+            if ($request->has('password')) $userData['password'] = Hash::make($request->password);
+            $user->update($userData);
 
+            // Perbarui data terapis
+            $data = $request->only(['spesialisasi']);
             if ($request->hasFile('foto')) {
                 if ($terapis->foto) {
                     Storage::disk('public')->delete($terapis->foto);
@@ -132,21 +157,26 @@ class TerapisController extends Controller
 
             $terapis->update($data);
 
+            // Tambahkan file_url dan muat relasi user
+            if ($terapis->foto) {
+                $terapis->file_url = asset('storage/' . $terapis->foto);
+            }
+            $terapis->load('user');
+
             return response()->json([
                 'status' => 'success',
-                'message' => 'Terapis updated successfully',
+                'message' => 'Terapis berhasil diperbarui',
                 'data' => $terapis,
-                'file_url' => $terapis->foto ? asset('storage/' . $terapis->foto) : null,
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terapis not found',
+                'message' => 'Terapis tidak ditemukan',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to update terapis',
+                'message' => 'Gagal memperbarui terapis',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -156,28 +186,31 @@ class TerapisController extends Controller
     {
         try {
             $terapis = Terapis::findOrFail($id);
+            $user = User::findOrFail($terapis->iduser);
 
             if ($terapis->foto) {
                 Storage::disk('public')->delete($terapis->foto);
             }
 
             $terapis->delete();
+            $user->delete(); // Hapus akun user juga karena relasi cascade-
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Terapis deleted successfully',
+                'message' => 'Terapis dan akun berhasil dihapus',
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terapis not found',
+                'message' => 'Terapis tidak ditemukan',
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to delete terapis',
+                'message' => 'Gagal menghapus terapis',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
 }
+

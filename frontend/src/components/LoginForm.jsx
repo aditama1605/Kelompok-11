@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { login } from "../api/auth";
 import { useNavigate } from "react-router-dom";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [toasts, setToasts] = useState([]); // Array to manage multiple toasts
+  const [toasts, setToasts] = useState([]);
   const navigate = useNavigate();
 
   const showToast = (type, title, message) => {
-    const id = Date.now(); // Unique ID for each toast
+    const id = Date.now();
     const newToast = { id, type, title, message };
-    setToasts((prev) => [newToast, ...prev]); // Prepend new toast
-
-    // Auto-remove after 4 seconds
+    setToasts((prev) => [newToast, ...prev]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, 4000);
@@ -34,11 +32,13 @@ export default function LoginForm() {
         localStorage.setItem("token", result.token);
         localStorage.setItem("role", result.user.role);
         localStorage.setItem("nama", result.user.nama || result.user.name || "");
-        localStorage.setItem("iduser", result.user.iduser); // <-- SIMPAN ID USER
+        localStorage.setItem("iduser", result.user.iduser);
         showToast("success", "Success", "Login berhasil! Anda akan diarahkan...");
 
         setTimeout(() => {
-          if (result.user.role === "terapis") {
+          if (result.user.role === "admin") {
+            navigate("/dashboard-admin");
+          } else if (result.user.role === "terapis") {
             navigate("/dashboard-terapis");
           } else if (result.user.role === "pasien") {
             navigate("/dashboard-pasien");
@@ -59,19 +59,7 @@ export default function LoginForm() {
       <section className="bg-white py-7 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           {/* Toast Container */}
-          <div
-            className="fixed top-4 right-4 z-50 space-y-3 w-80"
-            style={{
-              animation: "slideIn 0.5s forwards, fadeOut 0.5s forwards 3s",
-              "@keyframes slideIn": {
-                from: { transform: "translateX(100%)", opacity: 0 },
-                to: { transform: "translateX(0)", opacity: 1 },
-              },
-              "@keyframes fadeOut": {
-                to: { opacity: 0 },
-              },
-            }}
-          >
+          <div className="fixed top-4 right-4 z-50 space-y-3 w-80">
             {toasts.map((toast) => (
               <div
                 key={toast.id}
@@ -169,7 +157,6 @@ export default function LoginForm() {
             </p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Image Section */}
             <div className="flex items-center justify-center">
               <img
                 src="/img/image.png"
@@ -177,7 +164,6 @@ export default function LoginForm() {
                 className="max-w-full h-auto"
               />
             </div>
-            {/* Form Section */}
             <div className="rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>

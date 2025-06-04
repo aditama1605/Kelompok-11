@@ -22,8 +22,6 @@ return new class extends Migration
             $table->foreign('jadwal_terapi_id_jadwal_terapi')
                   ->references('id_jadwal_terapi')->on('jadwal_terapi')->onDelete('cascade');
 
-            $table->foreign('payment_id_payment')
-                  ->references('id_payment')->on('payment')->onDelete('cascade');
 
             $table->foreign('panduan_latihan_id_panduan_latihan')
                   ->references('id_panduan_latihan')->on('panduan_latihans')->onDelete('cascade');

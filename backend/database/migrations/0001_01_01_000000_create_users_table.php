@@ -6,18 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id('iduser'); // Primary key
+            $table->id('iduser'); // Kunci utama
             $table->string('nama');
             $table->string('email')->unique();
             $table->string('password');
-            $table->enum('role', ['pasien', 'terapis']);
-            $table->rememberToken(); // Untuk "remember me" jika pakai UI auth nanti
+            $table->enum('role', ['pasien', 'terapis', 'admin']); // Tambahkan 'admin'
+            $table->rememberToken();
             $table->timestamps();
         });
 
@@ -37,9 +34,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');

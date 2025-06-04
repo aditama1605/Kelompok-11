@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('jadwal_terapi', function (Blueprint $table) {
             $table->id('id_jadwal_terapi');
-            $table->date('tanggal')->nullable();
-            $table->dateTime('jadwal_terapi')->nullable(); // Changed to datetime for full date and time
-            $table->unsignedBigInteger('terapis_id'); // Renamed for consistency
-            $table->unsignedBigInteger('user_id'); // Renamed for consistency
-            $table->enum('jenis_layanan', ['Home Visit', 'OnWeb']);
+            $table->dateTime('jadwal_terapi');
+            $table->unsignedBigInteger('terapis_id');
+            $table->unsignedBigInteger('user_id');
+            $table->enum('jenis_layanan', ['Home Visit', 'Online']);
             $table->longText('alamat')->nullable();
+            $table->enum('status', ['Menunggu Konfirmasi', 'Diterima', 'Selesai'])->default('Menunggu Konfirmasi');
+            $table->decimal('nominal_payment', 10, 2)->default(0.00); // New column for payment amount
+            $table->string('bukti_pembayaran')->nullable(); // New column for proof of payment
             $table->timestamps();
 
             // Foreign Key Constraints

@@ -46,7 +46,7 @@ class AuthController extends Controller
             'nama' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email|max:255',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:pasien,terapis',
+            'role' => 'required|in:pasien,terapis,admin', // Tambahkan 'admin'
         ]);
 
         if ($validator->fails()) {
