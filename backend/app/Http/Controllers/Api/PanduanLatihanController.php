@@ -6,144 +6,181 @@ use App\Http\Controllers\Controller;
 use App\Models\PanduanLatihan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class PanduanLatihanController extends Controller
 {
-    /**
-     * Display a listing of the panduan latihan.
-     */
-    public function index(): JsonResponse
+    public function index()
     {
-        $panduanLatihan = PanduanLatihan::with('terapis')->get();
+        $panduanLatihans = PanduanLatihan::with('terapis.user')->get();
         return response()->json([
             'status' => 'success',
-            'data' => $panduanLatihan,
+            'data' => $panduanLatihans
         ], 200);
     }
 
-    /**
-     * Store a newly created panduan latihan in storage.
-     */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nama_latihan' => 'required|string|max:45',
-            'gambar_latihan' => 'required|string|max:255', // Asumsi string untuk path file
+            'nama_latihan' => 'required|string|max:255',
             'deskripsi_latihan' => 'required|string',
-            'durasi' => 'required|date_format:H:i:s',
-            'frekuensi' => 'required|string|max:45',
+            'file_latihan' => 'required|file|mimes:pdf,jpeg,png|max:10240', // Updated to match frontend
             'terapis_id_terapis' => 'required|exists:terapis,id_terapis',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'errors' => $validator->errors(),
+                'errors' => $validator->errors()
             ], 422);
         }
 
-        $panduanLatihan = PanduanLatihan::create($request->only([
-            'nama_latihan',
-            'gambar_latihan',
-            'deskripsi_latihan',
-            'durasi',
-            'frekuensi',
-            'terapis_id_terapis',
-        ]));
+        try {
+            DB::beginTransaction();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Panduan Latihan created successfully',
-            'data' => $panduanLatihan->load('terapis'),
-        ], 201);
+            $file = $request->file('file_latihan');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('panduan_latihan', $fileName, 'public');
+
+            $panduanLatihan = PanduanLatihan::create([
+                'nama_latihan' => $request->nama_latihan,
+                'deskripsi_latihan' => $request->deskripsi_latihan,
+                'file_latihan' => $fileName,
+                'terapis_id_terapis' => $request->terapis_id_terapis,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Panduan latihan berhasil dibuat',
+                'data' => $panduanLatihan->load('terapis.user')
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal membuat panduan latihan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Display the specified panduan latihan.
-     */
-    public function show($id): JsonResponse
+    public function show($id)
     {
-        $panduanLatihan = PanduanLatihan::with('terapis')->find($id);
+        $panduanLatihan = PanduanLatihan::with('terapis.user')->find($id);
 
         if (!$panduanLatihan) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Panduan Latihan not found',
+                'message' => 'Panduan latihan tidak ditemukan'
             ], 404);
         }
 
         return response()->json([
             'status' => 'success',
-            'data' => $panduanLatihan,
+            'data' => $panduanLatihan
         ], 200);
     }
 
-    /**
-     * Update the specified panduan latihan in storage.
-     */
-    public function update(Request $request, $id): JsonResponse
+    public function update(Request $request, $id)
     {
         $panduanLatihan = PanduanLatihan::find($id);
 
         if (!$panduanLatihan) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Panduan Latihan not found',
+                'message' => 'Panduan latihan tidak ditemukan'
             ], 404);
         }
 
         $validator = Validator::make($request->all(), [
-            'nama_latihan' => 'sometimes|required|string|max:45',
-            'gambar_latihan' => 'sometimes|required|string|max:255',
+            'nama_latihan' => 'sometimes|required|string|max:255',
             'deskripsi_latihan' => 'sometimes|required|string',
-            'durasi' => 'sometimes|required|date_format:H:i:s',
-            'frekuensi' => 'sometimes|required|string|max:45',
+            'file_latihan' => 'sometimes|file|mimes:pdf,jpeg,png|max:10240',
             'terapis_id_terapis' => 'sometimes|required|exists:terapis,id_terapis',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'errors' => $validator->errors(),
+                'errors' => $validator->errors()
             ], 422);
         }
 
-        $panduanLatihan->update($request->only([
-            'nama_latihan',
-            'gambar_latihan',
-            'deskripsi_latihan',
-            'durasi',
-            'frekuensi',
-            'terapis_id_terapis',
-        ]));
+        try {
+            DB::beginTransaction();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Panduan Latihan updated successfully',
-            'data' => $panduanLatihan->load('terapis'),
-        ], 200);
+            $data = $request->only([
+                'nama_latihan',
+                'deskripsi_latihan',
+                'terapis_id_terapis',
+            ]);
+
+            if ($request->hasFile('file_latihan')) {
+                if ($panduanLatihan->file_latihan) {
+                    Storage::disk('public')->delete('panduan_latihan/' . $panduanLatihan->file_latihan);
+                }
+
+                $file = $request->file('file_latihan');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('panduan_latihan', $fileName, 'public');
+                $data['file_latihan'] = $fileName;
+            }
+
+            $panduanLatihan->update($data);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Panduan latihan berhasil diperbarui',
+                'data' => $panduanLatihan->load('terapis.user')
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal memperbarui panduan latihan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Remove the specified panduan latihan from storage.
-     */
-    public function destroy($id): JsonResponse
+    public function destroy($id)
     {
         $panduanLatihan = PanduanLatihan::find($id);
 
         if (!$panduanLatihan) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Panduan Latihan not found',
+                'message' => 'Panduan latihan tidak ditemukan'
             ], 404);
         }
 
-        $panduanLatihan->delete();
+        try {
+            DB::beginTransaction();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Panduan Latihan deleted successfully',
-        ], 200);
+            if ($panduanLatihan->file_latihan) {
+                Storage::disk('public')->delete('panduan_latihan/' . $panduanLatihan->file_latihan);
+            }
+
+            $panduanLatihan->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Panduan latihan berhasil dihapus'
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal menghapus panduan latihan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

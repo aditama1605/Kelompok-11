@@ -26,6 +26,10 @@ use App\Http\Controllers\Api\MessageController;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
+Route::get('/storage/{any}', function ($any) {
+    return response()->file(storage_path('app/public/' . $any));
+})->middleware('cors');
+
 // Protected routes (require JWT authentication)
 Route::middleware('auth:api')->group(function () {
     // Logout and token refresh
@@ -49,6 +53,7 @@ Route::middleware('auth:api')->group(function () {
         // Mendapatkan daftar semua terapis (hanya untuk pasien)
         Route::get('/terapis', [MessageController::class, 'getAllTerapis']);
     });
+
     // User routes
     Route::middleware('role:pasien,terapis,admin')->group(function () {
         Route::get('/users', [UserController::class, 'index']);
@@ -64,7 +69,7 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
     });
 
-    // Terapis routes (management by admin only)
+    // Terapis routes
     Route::middleware('role:admin')->group(function () {
         Route::post('/terapis', [TerapisController::class, 'store']);
         Route::put('/terapis/{id}', [TerapisController::class, 'update']);
@@ -85,18 +90,15 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('role:pasien')->group(function () {
         Route::post('/payments', [PaymentController::class, 'store']);
         Route::put('/payments/{id}', [PaymentController::class, 'update']);
+        Route::post('/jadwal-terapi/{id}/upload-bukti', [JadwalTerapiController::class, 'uploadBuktiPembayaran']);
+    });
+
+    Route::middleware('role:terapis')->group(function () {
+        Route::post('/jadwal-terapi/{id}/verifikasi-pembayaran', [JadwalTerapiController::class, 'verifikasiPembayaran']);
     });
 
     Route::middleware('role:admin')->group(function () {
         Route::delete('/payments/{id}', [PaymentController::class, 'destroy']);
-    });
-
-    Route::middleware('role:pasien')->group(function () {
-    Route::post('/jadwal-terapi/{id}/upload-bukti', [JadwalTerapiController::class, 'uploadBuktiPembayaran']);
-});
-
-    Route::middleware('role:terapis')->group(function () {
-        Route::post('/jadwal-terapi/{id}/verifikasi-pembayaran', [JadwalTerapiController::class, 'verifikasiPembayaran']);
     });
 
     // Jadwal Terapi routes
@@ -109,7 +111,6 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/jadwal-terapi', [JadwalTerapiController::class, 'store']);
     });
 
-    // Pasien dan terapis dapat mengedit jadwal
     Route::middleware('role:pasien,terapis')->group(function () {
         Route::put('/jadwal-terapi/{id}', [JadwalTerapiController::class, 'update']);
     });
@@ -124,7 +125,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/panduan-latihan/{id}', [PanduanLatihanController::class, 'show']);
     });
 
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware('role:terapis')->group(function () {
         Route::post('/panduan-latihan', [PanduanLatihanController::class, 'store']);
         Route::put('/panduan-latihan/{id}', [PanduanLatihanController::class, 'update']);
         Route::delete('/panduan-latihan/{id}', [PanduanLatihanController::class, 'destroy']);
@@ -136,7 +137,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/laporan-pasien/{id}', [LaporanPasienController::class, 'show']);
     });
 
-    Route::middleware('role:pasien')->group(function () {
+    Route::middleware('role:terapis')->group(function () {
         Route::post('/laporan-pasien', [LaporanPasienController::class, 'store']);
         Route::put('/laporan-pasien/{id}', [LaporanPasienController::class, 'update']);
     });
@@ -149,11 +150,15 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('role:pasien,terapis,admin')->group(function () {
         Route::get('/laporan-perkembangan', [LaporanPerkembanganController::class, 'index']);
         Route::get('/laporan-perkembangan/{id}', [LaporanPerkembanganController::class, 'show']);
+        
+    });
+
+    Route::middleware('role:pasien')->group(function () {
+        Route::post('/laporan-perkembangan', [LaporanPerkembanganController::class, 'store']);
+        Route::put('/laporan-perkembangan/{id}', [LaporanPerkembanganController::class, 'update']);
     });
 
     Route::middleware('role:admin')->group(function () {
-        Route::post('/laporan-perkembangan', [LaporanPerkembanganController::class, 'store']);
-        Route::put('/laporan-perkembangan/{id}', [LaporanPerkembanganController::class, 'update']);
         Route::delete('/laporan-perkembangan/{id}', [LaporanPerkembanganController::class, 'destroy']);
     });
 });

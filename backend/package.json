@@ -14,7 +14,9 @@
         "vite": "^6.2.4"
     },
     "dependencies": {
+        "cors": "^2.8.5",
         "laravel-echo": "^2.1.4",
+        "pdfjs-dist": "^5.3.31",
         "socket.io-client": "^4.8.1"
     }
 }

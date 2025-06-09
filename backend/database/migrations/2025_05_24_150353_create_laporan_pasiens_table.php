@@ -14,17 +14,19 @@ return new class extends Migration
         Schema::create('laporan_pasiens', function (Blueprint $table) {
             $table->id('id_laporan_pasien');
             $table->longText('keluhan_pasien');
-            $table->unsignedBigInteger('jadwal_terapi_id_jadwal_terapi');
-            $table->unsignedBigInteger('payment_id_payment');
-            $table->unsignedBigInteger('panduan_latihan_id_panduan_latihan');
+            $table->unsignedBigInteger('jadwal_terapi_id_jadwal_terapi'); // Define the column explicitly
+            $table->unsignedBigInteger('panduan_latihan_id_panduan_latihan'); // Define the column explicitly
             $table->timestamps();
 
             $table->foreign('jadwal_terapi_id_jadwal_terapi')
-                  ->references('id_jadwal_terapi')->on('jadwal_terapi')->onDelete('cascade');
-
+                  ->references('id_jadwal_terapi')
+                  ->on('jadwal_terapi')
+                  ->onDelete('cascade');
 
             $table->foreign('panduan_latihan_id_panduan_latihan')
-                  ->references('id_panduan_latihan')->on('panduan_latihans')->onDelete('cascade');
+                  ->references('id_panduan_latihan')
+                  ->on('panduan_latihans')
+                  ->onDelete('cascade');
         });
     }
 

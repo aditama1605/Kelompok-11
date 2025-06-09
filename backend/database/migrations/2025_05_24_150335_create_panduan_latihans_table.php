@@ -14,15 +14,16 @@ return new class extends Migration
         Schema::create('panduan_latihans', function (Blueprint $table) {
             $table->id('id_panduan_latihan');
             $table->string('nama_latihan', 45);
-            $table->string('gambar_latihan');
+            $table->string('file_latihan')->nullable(); // Changed from gambar_latihan to file_latihan
             $table->longText('deskripsi_latihan');
-            $table->time('durasi');
-            $table->string('frekuensi', 45);
             $table->unsignedBigInteger('terapis_id_terapis');
             $table->timestamps();
-    
-            $table->foreign('terapis_id_terapis')->references('id_terapis')->on('terapis')->onDelete('cascade');
-            });
+
+            $table->foreign('terapis_id_terapis')
+                  ->references('id_terapis')
+                  ->on('terapis')
+                  ->onDelete('cascade');
+        });
     }
 
     /**

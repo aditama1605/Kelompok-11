@@ -15,9 +15,12 @@ return new class extends Migration
             $table->id('id_laporan_perkembangan');
             $table->text('ringkasan_perkembangan');
             $table->date('tanggal_laporan');
-            $table->string('gambar_perkembangan');
+            $table->string('file_perkembangan')->nullable(); // Changed from gambar_perkembangan to file_perkembangan
             $table->unsignedBigInteger('laporan_pasiens_id_laporan_pasiens');
-            $table->foreign('laporan_pasiens_id_laporan_pasiens')->references('id_laporan_pasien')->on('laporan_pasiens');
+            $table->foreign('laporan_pasiens_id_laporan_pasiens')
+                  ->references('id_laporan_pasien')
+                  ->on('laporan_pasiens')
+                  ->onDelete('cascade');
             $table->timestamps();
         });
     }
