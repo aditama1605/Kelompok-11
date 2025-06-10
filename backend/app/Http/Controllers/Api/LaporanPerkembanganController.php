@@ -30,7 +30,7 @@ class LaporanPerkembanganController extends Controller
         $validator = Validator::make($request->all(), [
             'ringkasan_perkembangan' => 'required|string',
             'tanggal_laporan' => 'required|date',
-            'file_perkembangan' => 'sometimes|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'file_perkembangan' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // Changed to nullable
             'laporan_pasiens_id_laporan_pasiens' => 'required|exists:laporan_pasiens,id_laporan_pasien',
         ]);
 
@@ -44,16 +44,21 @@ class LaporanPerkembanganController extends Controller
         try {
             DB::beginTransaction();
 
-            $file = $request->file('file_perkembangan');
-            $fileName = time() . '_' . rawurlencode($file->getClientOriginalName());
-            $filePath = $file->storeAs('laporan_perkembangan', $fileName, 'public');
-
-            $laporanPerkembangan = LaporanPerkembangan::create([
+            $data = [
                 'ringkasan_perkembangan' => $request->ringkasan_perkembangan,
                 'tanggal_laporan' => $request->tanggal_laporan,
-                'file_perkembangan' => $fileName,
                 'laporan_pasiens_id_laporan_pasiens' => $request->laporan_pasiens_id_laporan_pasiens,
-            ]);
+            ];
+
+            // Handle file upload if present
+            if ($request->hasFile('file_perkembangan')) {
+                $file = $request->file('file_perkembangan');
+                $fileName = time() . '_' . rawurlencode($file->getClientOriginalName());
+                $filePath = $file->storeAs('laporan_perkembangan', $fileName, 'public');
+                $data['file_perkembangan'] = $fileName;
+            }
+
+            $laporanPerkembangan = LaporanPerkembangan::create($data);
 
             DB::commit();
 
@@ -111,7 +116,7 @@ class LaporanPerkembanganController extends Controller
         $validator = Validator::make($request->all(), [
             'ringkasan_perkembangan' => 'sometimes|required|string',
             'tanggal_laporan' => 'sometimes|required|date',
-            'file_perkembangan' => 'sometimes|file|mimes:jpg,jpeg,png|max:10240',
+            'file_perkembangan' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240', // Changed to nullable
             'laporan_pasiens_id_laporan_pasiens' => 'sometimes|required|exists:laporan_pasiens,id_laporan_pasien',
         ]);
 
@@ -132,6 +137,7 @@ class LaporanPerkembanganController extends Controller
             ]);
 
             if ($request->hasFile('file_perkembangan')) {
+                // Delete old file if it exists
                 if ($laporanPerkembangan->file_perkembangan) {
                     Storage::disk('public')->delete('laporan_perkembangan/' . $laporanPerkembangan->file_perkembangan);
                 }
@@ -140,6 +146,12 @@ class LaporanPerkembanganController extends Controller
                 $fileName = time() . '_' . rawurlencode($file->getClientOriginalName());
                 $filePath = $file->storeAs('laporan_perkembangan', $fileName, 'public');
                 $data['file_perkembangan'] = $fileName;
+            } elseif ($request->has('file_perkembangan') && $request->file_perkembangan === null) {
+                // If file_perkembangan is explicitly set to null, remove the existing file
+                if ($laporanPerkembangan->file_perkembangan) {
+                    Storage::disk('public')->delete('laporan_perkembangan/' . $laporanPerkembangan->file_perkembangan);
+                    $data['file_perkembangan'] = null;
+                }
             }
 
             $laporanPerkembangan->update($data);

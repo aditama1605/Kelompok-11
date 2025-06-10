@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 class TerapisController extends Controller
 {
@@ -114,103 +115,119 @@ class TerapisController extends Controller
         }
     }
 
-    public function update(Request $request, int $id): JsonResponse
-    {
-        try {
-            $terapis = Terapis::findOrFail($id);
-            $user = User::findOrFail($terapis->iduser);
 
-            $validator = Validator::make($request->all(), [
-                'nama' => 'sometimes|string|max:255', // Untuk users table
-                'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->iduser . ',iduser',
-                'password' => 'sometimes|string|min:8',
-                'spesialisasi' => 'sometimes|string|max:255',
-                'foto' => 'nullable|image|max:2048',
-            ]);
+public function update(Request $request, int $id): JsonResponse
+{
+    try {
+        $terapis = Terapis::findOrFail($id);
+        $user = User::findOrFail($terapis->iduser);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
+        $validator = Validator::make($request->all(), [
+            'nama' => 'sometimes|string|max:255',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->iduser . ',iduser',
+            'password' => 'sometimes|string|min:8',
+            'spesialisasi' => 'sometimes|string|max:255',
+            'foto' => 'nullable|image|max:2048',
+        ]);
 
-            // Perbarui data user
-            $userData = [];
-            if ($request->has('nama')) $userData['nama'] = $request->nama;
-            if ($request->has('email')) $userData['email'] = $request->email;
-            if ($request->has('password')) $userData['password'] = Hash::make($request->password);
-            $user->update($userData);
-
-            // Perbarui data terapis
-            $data = $request->only(['spesialisasi']);
-            if ($request->hasFile('foto')) {
-                if ($terapis->foto) {
-                    Storage::disk('public')->delete($terapis->foto);
-                }
-                $file = $request->file('foto');
-                $timestamp = now()->format('YmdHis');
-                $extension = $file->getClientOriginalExtension();
-                $filename = "fototerapis_{$timestamp}.{$extension}";
-                $data['foto'] = $file->storeAs('terapis_photos', $filename, 'public');
-            }
-
-            $terapis->update($data);
-
-            // Tambahkan file_url dan muat relasi user
-            if ($terapis->foto) {
-                $terapis->file_url = asset('storage/' . $terapis->foto);
-            }
-            $terapis->load('user');
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Terapis berhasil diperbarui',
-                'data' => $terapis,
-            ], 200);
-        } catch (ModelNotFoundException $e) {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Terapis tidak ditemukan',
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal memperbarui terapis',
-                'error' => $e->getMessage(),
-            ], 500);
+                'errors' => $validator->errors(),
+            ], 422);
         }
-    }
 
-    public function destroy(int $id): JsonResponse
-    {
-        try {
-            $terapis = Terapis::findOrFail($id);
-            $user = User::findOrFail($terapis->iduser);
+        DB::beginTransaction();
 
+        // Perbarui data user
+        $userData = [];
+        if ($request->has('nama')) $userData['nama'] = $request->nama;
+        if ($request->has('email')) $userData['email'] = $request->email;
+        if ($request->has('password')) $userData['password'] = Hash::make($request->password);
+        $user->update($userData);
+
+        // Perbarui data terapis
+        $data = $request->only(['spesialisasi']);
+        if ($request->hasFile('foto')) {
             if ($terapis->foto) {
                 Storage::disk('public')->delete($terapis->foto);
             }
-
-            $terapis->delete();
-            $user->delete(); // Hapus akun user juga karena relasi cascade-
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Terapis dan akun berhasil dihapus',
-            ], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Terapis tidak ditemukan',
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal menghapus terapis',
-                'error' => $e->getMessage(),
-            ], 500);
+            $file = $request->file('foto');
+            $timestamp = now()->format('YmdHis');
+            $extension = $file->getClientOriginalExtension();
+            $filename = "fototerapis_{$timestamp}.{$extension}";
+            $data['foto'] = $file->storeAs('terapis_photos', $filename, 'public');
         }
+
+        $terapis->update($data);
+
+        DB::commit();
+
+        // Tambahkan file_url dan muat relasi user
+        if ($terapis->foto) {
+            $terapis->file_url = asset('storage/' . $terapis->foto);
+        }
+        $terapis->load('user');
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Terapis berhasil diperbarui',
+            'data' => $terapis,
+        ], 200);
+    } catch (ModelNotFoundException $e) {
+        DB::rollBack();
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Terapis tidak ditemukan',
+        ], 404);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Gagal memperbarui terapis',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
+
+public function destroy(int $id): JsonResponse
+{
+    try {
+        $terapis = Terapis::findOrFail($id);
+        $user = User::findOrFail($terapis->iduser);
+
+        DB::beginTransaction();
+
+        // Hapus foto jika ada
+        if ($terapis->foto && Storage::disk('public')->exists($terapis->foto)) {
+            Storage::disk('public')->delete($terapis->foto);
+        }
+
+        // Hapus terapis dan user
+        $terapis->delete();
+        $user->delete();
+
+        DB::commit();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Terapis dan akun berhasil dihapus',
+        ], 200);
+        
+    } catch (ModelNotFoundException $e) {
+        DB::rollBack();
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Terapis tidak ditemukan',
+        ], 404);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Gagal menghapus terapis: ' . $e->getMessage(),
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
 }
 

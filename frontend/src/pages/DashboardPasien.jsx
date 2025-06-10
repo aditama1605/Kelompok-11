@@ -2003,7 +2003,6 @@
     const validateProgressForm = () => {
       const errors = {};
       if (!ringkasanPerkembangan.trim()) errors.ringkasanPerkembangan = "Ringkasan perkembangan tidak boleh kosong!";
-      if (!filePerkembangan) errors.filePerkembangan = "File perkembangan harus diunggah!";
       // Add file type/size validation if needed
       setFormErrors(errors);
       return Object.keys(errors).length === 0;
@@ -2019,7 +2018,6 @@
       const formData = new FormData();
       formData.append("laporan_pasiens_id_laporan_pasiens", laporanPasienId);
       formData.append("ringkasan_perkembangan", ringkasanPerkembangan);
-      formData.append("file_perkembangan", filePerkembangan);
       formData.append("tanggal_laporan", new Date().toISOString().split('T')[0]); // Current date
 
       try {
@@ -2067,30 +2065,6 @@
               {formErrors.ringkasanPerkembangan && (
                 <p id="ringkasan-error" className="mt-1 text-sm text-red-500">
                   {formErrors.ringkasanPerkembangan}
-                </p>
-              )}
-            </div>
-            <div>
-              <label htmlFor="filePerkembangan" className="block text-sm font-medium text-gray-700 mb-2">
-                File Pendukung (PDF, DOCX, maks 10MB)
-              </label>
-              <input
-                id="filePerkembangan"
-                type="file"
-                accept="image/png, image/jpeg"
-                onChange={(e) => setFilePerkembangan(e.target.files[0])}
-                className={`w-full px-3 py-2 rounded-md border file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100 ${
-                  formErrors.filePerkembangan ? "border-red-500" : "border-gray-200"
-                } bg-white focus:border-rose-600 focus:ring-2 focus:ring-rose-100 transition text-sm`}
-                aria-invalid={!!formErrors.filePerkembangan}
-                aria-describedby="file-perkembangan-error"
-              />
-              {filePerkembangan && (
-                <p className="mt-2 text-sm text-gray-500">File: {filePerkembangan.name}</p>
-              )}
-              {formErrors.filePerkembangan && (
-                <p id="file-perkembangan-error" className="mt-1 text-sm text-red-500">
-                  {formErrors.filePerkembangan}
                 </p>
               )}
             </div>
@@ -2365,7 +2339,7 @@ const handleOpenPdfModal = (fileIdentifier, title) => {
           </div>
           <div className="flex flex-col flex-1 overflow-y-auto"> {/* [cite: 40] */}
             <nav className="flex-1 px-3 py-4"> {/* [cite: 41] */}
-              {["terapis", "riwayat", "pesan"].map((tab) => ( // [cite: 41]
+              {["terapis", "jadwal", "pesan"].map((tab) => ( // [cite: 41]
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -2393,7 +2367,7 @@ const handleOpenPdfModal = (fileIdentifier, title) => {
                         6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" // [cite: 46, 47]
                       />
                     )}
-                    {tab === "riwayat" && ( // [cite: 47]
+                    {tab === "jadwal" && ( // [cite: 47]
                       <path
                         strokeLinecap="round" // [cite: 48]
                         strokeLinejoin="round" // [cite: 48]
@@ -2514,48 +2488,144 @@ const handleOpenPdfModal = (fileIdentifier, title) => {
           <section className=" bg-gray-50 py-6 px-4 sm:px-6 lg:px-8"> {/* [cite: 67] */}
             <div className="max-w-7xl mx-auto"> {/* [cite: 68] */}
               <div className="bg-white rounded-lg shadow-sm p-6"> {/* [cite: 68] */}
-                {activeTab === "terapis" && ( // [cite: 68]
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 mb-6">Daftar Terapis</h2> {/* [cite: 68] */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                      {terapisList.map((terapis) => ( // [cite: 69]
-                        <div
-                          key={terapis.id_terapis} // [cite: 69]
-                          className="bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden" // [cite: 69]
-                        >
-                          <img
-                            src={getPhotoUrl(terapis.foto)} // [cite: 70]
-                            alt={terapis.user?.nama || terapis.nama || "Dokter"} // [cite: 70, 71]
-                            className="w-full h-80 object-cover" // [cite: 71]
-                            onError={(e) => { // [cite: 71]
-                              e.target.src = "https://img.freepik.com/premium-vector/profile-icon_933463-643.jpg"; // [cite: 71]
-                            }}
-                          />
-                          <div className="p-4 text-center"> {/* [cite: 72] */}
-                            <h3 className="text-sm font-medium text-gray-900"> {/* [cite: 72] */}
-                              {terapis.user?.nama || terapis.nama || "Tidak Diketahui"} {/* [cite: 73, 74] */}
-                            </h3>
-                            <p className="text-xs text-gray-500">{terapis.spesialisasi || "Dokter Umum"}</p> {/* [cite: 74, 75] */}
-                            <button
-                              onClick={() => openModal(terapis.id_terapis)} // [cite: 75]
-                              className="mt-4 w-full bg-rose-600 text-white text-xs font-medium py-2 rounded-md hover:bg-rose-700 transition-colors" // [cite: 75]
-                              aria-label={`Buat janji dengan ${terapis.user?.nama || terapis.nama || "Dokter"}`} // [cite: 76, 77]
-                            >
-                              Buat Janji
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+{activeTab === "terapis" && (
+  <div>
+    <div className="flex justify-between items-center mb-6">
+      <h2 className="text-2xl font-bold text-gray-900">Daftar Terapis</h2>
+    </div>
 
-                {activeTab === "riwayat" && ( // [cite: 79]
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+      {terapisList.map((terapis) => (
+        <div
+          key={terapis.id_terapis}
+          className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100 flex flex-col"
+        >
+          <div className="relative">
+            <img
+              src={getPhotoUrl(terapis.foto)}
+              alt={terapis.user?.nama || terapis.nama || "Terapis"}
+              className="w-full h-72 object-cover"
+              onError={(e) => {
+                e.target.src = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=688&q=80";
+              }}
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+              <div className="flex justify-between items-end">
+                <div>
+                  <h3 className="text-white font-bold text-xl">
+                    {terapis.user?.nama || terapis.nama || "Tidak Diketahui"}
+                  </h3>
+                  <p className="text-rose-300 font-medium">
+                    {terapis.spesialisasi || "Terapis Umum"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-5 flex-grow">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 border-t border-gray-200"></div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-rose-500"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
+                  clipRule="evenodd"
+                />
+                <path
+                  d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"
+                />
+              </svg>
+              <div className="flex-1 border-t border-gray-200"></div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-5">
+              <div className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-gray-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                <span className="text-sm text-gray-600">Jakarta</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-gray-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                <span className="text-sm text-gray-600">Tersedia</span>
+              </div>
+            </div>
+
+            <p className="text-gray-600 text-sm mb-5 line-clamp-3">
+              {terapis.bio || "Terapis profesional dengan pengalaman luas dalam menangani berbagai kondisi kesehatan."}
+            </p>
+          </div>
+
+          <div className="px-5 pb-5">
+            <button
+              onClick={() => openModal(terapis.id_terapis)}
+              className="w-full bg-gradient-to-r from-rose-600 to-rose-500 text-white font-medium py-3 rounded-lg hover:from-rose-700 hover:to-rose-600 transition-all flex items-center justify-center gap-2"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              Buat Janji
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
+                {activeTab === "jadwal" && ( // [cite: 79]
                   <div>
                     {jadwalList.length > 0 ? ( // [cite: 79]
                       <div className="bg-white rounded-lg shadow-sm overflow-hidden"> {/* [cite: 79] */}
                         <div className="p-6 border-b border-gray-200"> {/* [cite: 80] */}
-                          <h2 className="text-lg font-semibold text-gray-800">Riwayat Jadwal Terapi</h2> {/* [cite: 80] */}
+                          <h2 className="text-lg font-semibold text-gray-800">Jadwal Terapi</h2> {/* [cite: 80] */}
                           <p className="text-sm text-gray-500 mt-1">Kelola jadwal terapi Anda di sini.</p> {/* [cite: 80] */}
                         </div>
                         <div className="overflow-x-auto"> {/* [cite: 81] */}
@@ -2921,251 +2991,262 @@ const handleOpenPdfModal = (fileIdentifier, title) => {
               </div>
             </div>
           </section>
-          {/* Jadwal Modal (existing code) */} {/* [cite: 202] */}
-          {isModalOpen && ( // [cite: 202]
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"> {/* [cite: 203] */}
-              <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 sm:mx-auto shadow-lg"> {/* [cite: 203] */}
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Ajukan Jadwal Terapi</h3> {/* [cite: 203] */}
-                <form onSubmit={handleSubmitJadwal} className="space-y-6" encType="multipart/form-data"> {/* [cite: 203] */}
-                  <div className="relative"> {/* [cite: 203] */}
-                    <label htmlFor="terapis" className="block text-sm font-medium text-gray-700 mb-2"> {/* [cite: 204] */}
-                      Pilih Terapis
-                    </label>
-                    <div className="flex items-center"> {/* [cite: 204] */}
-                      <svg
-                        className="absolute left-3 top-10 h-5 w-5 text-gray-400" // [cite: 205]
-                        xmlns="http://www.w3.org/2000/svg" // [cite: 205]
-                        fill="none" // [cite: 205]
-                        viewBox="0 0 24 24" // [cite: 205]
-                        stroke="currentColor" // [cite: 206]
-                        aria-hidden="true" // [cite: 206]
-                      >
-                        <path // [cite: 206]
-                          strokeLinecap="round" // [cite: 206]
-                          strokeLinejoin="round" // [cite: 207]
-                          strokeWidth="2" // [cite: 207]
-                          d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" // [cite: 207]
-                        />
-                      </svg>
-                      <select
-                        id="terapis" // [cite: 208]
-                        value={selectedTerapis} // [cite: 208]
-                        onChange={(e) => setSelectedTerapis(e.target.value)} // [cite: 209]
-                        className={`w-full pl-10 pr-4 py-2 rounded-md border ${ // [cite: 209]
-                          formErrors.selectedTerapis ? "border-red-500" : "border-gray-200" // [cite: 209, 210]
-                        } bg-white focus:border-rose-600 focus:ring-2 focus:ring-rose-100 transition text-sm`} // [cite: 210]
-                        aria-invalid={!!formErrors.selectedTerapis} // [cite: 210]
-                        aria-describedby="terapis-error" // [cite: 210]
-                      >
-                        <option value="">Pilih Terapis</option> {/* [cite: 211] */}
-                        {terapisList.map((terapis) => ( // [cite: 211]
-                          <option key={terapis.id_terapis} value={terapis.id_terapis}> {/* [cite: 211] */}
-                            {terapis.user?.nama || terapis.nama || "Tidak Diketahui"} ( {/* [cite: 211] */}
-                            {terapis.spesialisasi || "Dokter Umum"}) {/* [cite: 212] */}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    {formErrors.selectedTerapis && ( // [cite: 213]
-                      <p id="terapis-error" className="mt-1 text-sm text-red-500"> {/* [cite: 213] */}
-                        {formErrors.selectedTerapis} {/* [cite: 213] */}
-                      </p>
-                    )}
+{isModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl flex flex-col md:flex-row overflow-hidden" style={{ maxHeight: '95vh' }}>
+      {/* Left Side - Payment Information */}
+      <div className="bg-gradient-to-b from-rose-600 to-rose-500 p-6 text-white md:w-2/5 flex flex-col">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-2xl font-bold">Ajukan Jadwal Terapi</h3>
+            <p className="text-rose-100 mt-1 text-sm">Lengkapi formulir untuk membuat janji terapi</p>
+          </div>
+          <button 
+            onClick={closeModal}
+            className="text-white hover:text-rose-200 transition p-1"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Illustration */}
+        {/* <div className="mt-6 flex-1 flex items-center justify-center">
+          <img 
+            src="https://u7.uidownload.com/vector/682/160/vector-physiotherapy-colorful-icons-svg-ai.jpg" 
+            alt="Therapy Illustration"
+            className="w-full max-w-xs object-contain"
+          />
+        </div> */}
+        
+        {/* Payment Card */}
+        <div className="bg-white/10 p-5 rounded-lg backdrop-blur-sm border border-white/20 mt-6">
+          <div className="flex justify-between items-center pb-3 border-b border-white/20">
+            <h4 className="font-medium">Total Pembayaran</h4>
+            <span className="font-bold text-xl">
+              {jenisLayanan === "Home Visit" ? "Rp 200.000" : "Rp 30.000"}
+            </span>
+          </div>
+          
+          <div className="mt-4">
+            <h5 className="text-sm font-medium mb-3">Transfer ke rekening:</h5>
+            
+            {/* Bank Account */}
+            <div className="space-y-3">
+              {/* BCA */}
+              <div className="bg-white/10 p-3 rounded-lg">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center shrink-0">
+                    <span className="text-xs font-bold">BCA</span>
                   </div>
-                  <div className="relative"> {/* [cite: 214] */}
-                    <label htmlFor="jadwal" className="block text-sm font-medium text-gray-700 mb-2"> {/* [cite: 214] */}
-                      Jadwal Terapi
-                    </label>
-                    <div className="flex items-center"> {/* [cite: 215] */}
-                      <svg
-                        className="absolute left-3 top-10 h-5 w-5 text-gray-400" // [cite: 215]
-                        xmlns="http://www.w3.org/2000/svg" // [cite: 216]
-                        fill="none" // [cite: 216]
-                        viewBox="0 0 24 24" // [cite: 216]
-                        stroke="currentColor" // [cite: 216]
-                        aria-hidden="true" // [cite: 216]
-                      >
-                        <path // [cite: 217]
-                          strokeLinecap="round" // [cite: 217]
-                          strokeLinejoin="round" // [cite: 217]
-                          strokeWidth="2" // [cite: 218]
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" // [cite: 218]
-                        />
-                      </svg>
-                      <input
-                        id="jadwal" // [cite: 219]
-                        type="datetime-local" // [cite: 219]
-                        value={jadwal} // [cite: 219]
-                        onChange={(e) => setJadwal(e.target.value)} // [cite: 219, 220]
-                        min={new Date().toISOString().slice(0, 16)} // [cite: 220]
-                        className={`w-full pl-10 pr-4 py-2 rounded-md border ${ // [cite: 220]
-                          formErrors.jadwal ? "border-red-500" : "border-gray-200" // [cite: 220, 221]
-                        } bg-white focus:border-rose-600 focus:ring-2 focus:ring-rose-100 transition text-sm`} // [cite: 221]
-                        required // [cite: 221]
-                        aria-invalid={!!formErrors.jadwal} // [cite: 221]
-                        aria-describedby="jadwal-error" // [cite: 221]
-                      />
-                    </div>
-                    {formErrors.jadwal && ( // [cite: 222]
-                      <p id="jadwal-error" className="mt-1 text-sm text-red-500"> {/* [cite: 222] */}
-                        {formErrors.jadwal} {/* [cite: 223] */}
-                      </p>
-                    )}
+                  <p className="font-medium">Bank Central Asia</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <p className="text-rose-100 text-xs mb-1">No. Rekening</p>
+                    <p className="font-mono tracking-wider">123 456 7890</p>
                   </div>
-                  <div className="relative"> {/* [cite: 223] */}
-                    <label htmlFor="jenisLayanan" className="block text-sm font-medium text-gray-700 mb-2"> {/* [cite: 223] */}
-                      Jenis Layanan {/* [cite: 224] */}
-                    </label>
-                    <div className="flex items-center"> {/* [cite: 224] */}
-                      <svg
-                        className="absolute left-3 top-10 h-5 
-  w-5 text-gray-400" // [cite: 224, 225]
-                        xmlns="http://www.w3.org/2000/svg" // [cite: 225]
-                        fill="none" // [cite: 225]
-                        viewBox="0 0 24 24" // [cite: 225]
-                        stroke="currentColor" // [cite: 225]
-                        aria-hidden="true" // [cite: 226]
-                      >
-                        <path // [cite: 226]
-                          strokeLinecap="round" // [cite: 226]
-                          strokeLinejoin="round" // [cite: 227]
-                          strokeWidth="2" // [cite: 227]
-                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" // [cite: 227]
-                        />
-                      </svg>
-                      <select
-                        id="jenisLayanan" // [cite: 228]
-                        value={jenisLayanan} // [cite: 228]
-                        onChange={(e) => setJenisLayanan(e.target.value)} // [cite: 229]
-                        className="w-full pl-10 pr-4 py-2 rounded-md border border-gray-200 bg-white focus:border-rose-600 focus:ring-2 focus:ring-rose-100 transition text-sm" // [cite: 229]
-                      >
-                        <option value="Home Visit">Home Visit (Rp 200.000)</option> {/* [cite: 229] */}
-                        <option value="Online">Online (Rp 30.000)</option> {/* [cite: 230] */}
-                      </select>
-                    </div>
+                  <div>
+                    <p className="text-rose-100 text-xs mb-1">Atas Nama</p>
+                    <p className="font-medium">Klinik Sehat Terapi</p>
                   </div>
-                  {jenisLayanan === "Home Visit" && ( // [cite: 230]
-                    <div className="relative"> {/* [cite: 231] */}
-                      <label htmlFor="alamat" className="block text-sm font-medium text-gray-700 mb-2"> {/* [cite: 231] */}
-                        Alamat Kunjungan
-                      </label>
-                      <div className="flex items-start"> {/* [cite: 232] */}
-                        <svg
-                          className="absolute left-3 top-10 h-5 w-5 text-gray-400" // [cite: 232]
-                          xmlns="http://www.w3.org/2000/svg" // [cite: 232]
-                          fill="none" // [cite: 233]
-                          viewBox="0 0 24 24" // [cite: 233]
-                          stroke="currentColor" // [cite: 233]
-                          aria-hidden="true" // [cite: 233]
-                        >
-                          <path // [cite: 234]
-                            strokeLinecap="round" // [cite: 234]
-                            strokeLinejoin="round" // [cite: 234]
-                            strokeWidth="2" // [cite: 235]
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" // [cite: 235]
-                          />
-                          <path
-                            strokeLinecap="round" // [cite: 236]
-                            strokeLinejoin="round" // [cite: 236]
-                            strokeWidth="2" // [cite: 236]
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 
-  0z" // [cite: 236, 237]
-                          />
-                        </svg>
-                        <textarea
-                          id="alamat" // [cite: 237]
-                          value={alamat} // [cite: 238]
-                          onChange={(e) => setAlamat(e.target.value)} // [cite: 238]
-                          placeholder="Masukkan alamat lengkap" // [cite: 238]
-                          className={`w-full pl-10 pr-4 py-2 rounded-md border ${ // [cite: 238]
-                            formErrors.alamat ? "border-red-500" : "border-gray-200" // [cite: 239, 240]
-                          } bg-white focus:border-rose-600 focus:ring-2 focus:ring-rose-100 transition text-sm resize-none h-24`} // [cite: 240]
-                          required // [cite: 240]
-                          aria-invalid={!!formErrors.alamat} // [cite: 240]
-                          aria-describedby="alamat-error" // [cite: 241]
-                        />
-                      </div>
-                      {formErrors.alamat && ( // [cite: 241]
-                        <p id="alamat-error" className="mt-1 text-sm text-red-500"> {/* [cite: 241] */}
-                          {formErrors.alamat} {/* [cite: 242] */}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  <div className="relative"> {/* [cite: 243] */}
-                    <label htmlFor="buktiPembayaran" className="block text-sm font-medium text-gray-700 mb-2"> {/* [cite: 243] */}
-                      Bukti Pembayaran
-                    </label>
-                    <div className="flex items-center"> {/* [cite: 243] */}
-                      <svg
-                        className="absolute left-3 top-10 h-5 w-5 text-gray-400" // [cite: 244]
-                        xmlns="http://www.w3.org/2000/svg" // [cite: 244]
-                        fill="none" // [cite: 244]
-                        viewBox="0 0 24 24" // [cite: 245]
-                        stroke="currentColor" // [cite: 245]
-                        aria-hidden="true" // [cite: 245]
-                      >
-                        <path
-                          strokeLinecap="round" // [cite: 246]
-                          strokeLinejoin="round" // [cite: 246]
-                          strokeWidth="2" // [cite: 246]
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 
-  16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" // [cite: 246, 247]
-                        />
-                      </svg>
-                      <input
-                        id="buktiPembayaran" // [cite: 248]
-                        type="file" // [cite: 248]
-                        accept="image/jpeg,image/png,application/pdf" // [cite: 248]
-                        onChange={(e) => setBuktiPembayaran(e.target.files[0])} // [cite: 248]
-                        className={`w-full pl-10 pr-4 py-2 rounded-md border 
-  ${// [cite: 248, 249]
-                          formErrors.buktiPembayaran ? "border-red-500" : "border-gray-200" // [cite: 249, 250]
-                        } bg-white focus:border-rose-600 focus:ring-2 focus:ring-rose-100 transition text-sm`} // [cite: 250]
-                        required // [cite: 250]
-                        aria-invalid={!!formErrors.buktiPembayaran} // [cite: 250]
-                        aria-describedby="buktiPembayaran-error" // [cite: 250]
-                      />
-                    </div>
-                    {buktiPembayaran && ( // [cite: 251]
-                      <p className="mt-2 text-sm text-gray-500">File: {buktiPembayaran.name}</p> // [cite: 251]
-                    )}
-                    {buktiPembayaran && buktiPembayaran.type.startsWith("image/") && ( // [cite: 252]
-                      <img
-                        src={URL.createObjectURL(buktiPembayaran)} // [cite: 252]
-                        alt="Bukti Pembayaran Preview" // [cite: 252]
-                        className="mt-2 w-full h-32 object-contain rounded-md border border-gray-200" // [cite: 253]
-                      />
-                    )}
-                    <p className="mt-2 text-sm text-gray-500">Unggah file JPG, PNG, atau PDF (maks 2MB).</p> {/* [cite: 253] */}
-                    {formErrors.buktiPembayaran && ( // [cite: 253]
-                      <p id="buktiPembayaran-error" className="mt-1 text-sm text-red-500"> {/* [cite: 254] */}
-                        {formErrors.buktiPembayaran} {/* [cite: 254] */}
-                      </p>
-                    )}
+                </div>
+              </div>
+              
+              {/* BRI */}
+              <div className="bg-white/10 p-3 rounded-lg">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center shrink-0">
+                    <span className="text-xs font-bold">BRI</span>
                   </div>
-                  <div className="flex justify-end space-x-3"> {/* [cite: 255] */}
-                    <button
-                      type="button" // [cite: 255]
-                      onClick={closeModal} // [cite: 255]
-                      className="px-4 py-2 text-sm font-medium text-gray-700 
-  bg-gray-200 rounded-md hover:bg-gray-300 transition" // [cite: 255, 256]
-                      aria-label="Batal" // [cite: 256]
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="submit" // [cite: 257]
-                      className="px-4 py-2 text-sm font-medium text-white bg-rose-600 rounded-md hover:bg-rose-700 transition" // [cite: 257]
-                      aria-label="Ajukan jadwal" // [cite: 257]
-                    >
-                      Ajukan Jadwal {/* [cite: 258] */}
-                    </button>
+                  <p className="font-medium">Bank Rakyat Indonesia</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <p className="text-rose-100 text-xs mb-1">No. Rekening</p>
+                    <p className="font-mono tracking-wider">987 654 3210</p>
                   </div>
-                </form>
+                  <div>
+                    <p className="text-rose-100 text-xs mb-1">Atas Nama</p>
+                    <p className="font-medium">Klinik Sehat Terapi</p>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side - Form */}
+      <div className="p-8 md:w-3/5 overflow-y-auto">
+        <form onSubmit={handleSubmitJadwal} className="space-y-5" encType="multipart/form-data">
+          {/* Therapist Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Pilih Terapis</label>
+            <select
+              value={selectedTerapis}
+              onChange={(e) => setSelectedTerapis(e.target.value)}
+              className={`block w-full px-4 py-2.5 rounded-lg border ${formErrors.selectedTerapis ? "border-red-500" : "border-gray-300"} bg-white shadow-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-sm`}
+            >
+              <option value="">Pilih Terapis</option>
+              {terapisList.map((terapis) => (
+                <option key={terapis.id_terapis} value={terapis.id_terapis}>
+                  {terapis.user?.nama || terapis.nama || "Tidak Diketahui"} ({terapis.spesialisasi || "Dokter Umum"})
+                </option>
+              ))}
+            </select>
+            {formErrors.selectedTerapis && (
+              <p className="mt-1.5 text-sm text-red-600">{formErrors.selectedTerapis}</p>
+            )}
+          </div>
+
+          {/* Schedule and Service Type */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Schedule Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Jadwal Terapi</label>
+              <input
+                type="datetime-local"
+                value={jadwal}
+                onChange={(e) => {
+                  const selectedDateTime = new Date(e.target.value);
+                  const hours = selectedDateTime.getHours();
+                  
+                  if (hours >= 8 && hours < 15) {
+                    setJadwal(e.target.value);
+                    setFormErrors({ ...formErrors, jadwal: "" });
+                  } else {
+                    setFormErrors({
+                      ...formErrors,
+                      jadwal: "Jadwal harus antara pukul 08:00 dan 15:00",
+                    });
+                  }
+                }}
+                min={new Date().toISOString().slice(0, 16)}
+                className={`block w-full px-4 py-2.5 rounded-lg border ${formErrors.jadwal ? "border-red-500" : "border-gray-300"} bg-white shadow-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-sm`}
+                required
+              />
+              {formErrors.jadwal && (
+                <p className="mt-1.5 text-sm text-red-600">{formErrors.jadwal}</p>
+              )}
+            </div>
+
+            {/* Service Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Jenis Layanan</label>
+              <select
+                value={jenisLayanan}
+                onChange={(e) => setJenisLayanan(e.target.value)}
+                className="block w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white shadow-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-sm"
+              >
+                <option value="Home Visit">Home Visit (Rp 200.000)</option>
+                <option value="Online">Online (Rp 30.000)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Address (only for Home Visit) */}
+          {jenisLayanan === "Home Visit" && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Alamat Kunjungan</label>
+              <textarea
+                value={alamat}
+                onChange={(e) => setAlamat(e.target.value)}
+                placeholder="Masukkan alamat lengkap"
+                className={`block w-full px-4 py-2.5 rounded-lg border ${formErrors.alamat ? "border-red-500" : "border-gray-300"} bg-white shadow-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-sm min-h-[100px]`}
+                required
+              />
+              {formErrors.alamat && (
+                <p className="mt-1.5 text-sm text-red-600">{formErrors.alamat}</p>
+              )}
+            </div>
           )}
+
+          {/* Payment Proof */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Bukti Pembayaran</label>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <label className="flex-1 cursor-pointer">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-5 text-center hover:border-rose-300 transition-all duration-200">
+                  <div className="flex flex-col items-center justify-center">
+                    <svg className="h-10 w-10 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium text-rose-600">Klik untuk upload</span> atau drag and drop
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">PNG, JPG, PDF (maks. 2MB)</p>
+                  </div>
+                  <input 
+                    type="file" 
+                    className="sr-only"
+                    accept="image/*,.pdf"
+                    onChange={(e) => setBuktiPembayaran(e.target.files[0])}
+                  />
+                </div>
+              </label>
+              
+              {buktiPembayaran && (
+                <div className="flex-1">
+                  <div className="border border-gray-200 rounded-lg p-4 h-full">
+                    <p className="text-sm font-medium text-gray-700 mb-3">File terpilih:</p>
+                    <div className="flex items-center gap-4">
+                      {buktiPembayaran.type.startsWith("image/") ? (
+                        <img 
+                          src={URL.createObjectURL(buktiPembayaran)} 
+                          alt="Preview bukti pembayaran" 
+                          className="h-16 w-16 object-cover rounded-lg border border-gray-200"
+                        />
+                      ) : (
+                        <div className="h-16 w-16 flex items-center justify-center bg-gray-100 rounded-lg border border-gray-200">
+                          <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-700 truncate">{buktiPembayaran.name}</p>
+                        <p className="text-xs text-gray-500 mt-1">{Math.round(buktiPembayaran.size / 1024)} KB</p>
+                        <button 
+                          type="button"
+                          onClick={() => setBuktiPembayaran(null)}
+                          className="text-xs text-rose-600 hover:text-rose-800 mt-2"
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            {formErrors.buktiPembayaran && (
+              <p className="mt-1.5 text-sm text-red-600">{formErrors.buktiPembayaran}</p>
+            )}
+          </div>
+
+          {/* Form Actions */}
+          <div className="flex justify-end space-x-3 pt-2">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-colors"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-colors"
+            >
+              Ajukan Jadwal
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+)}
           {/* Edit Profile Modal (existing code) */} {/* [cite: 258] */}
           {isEditProfileOpen && ( // [cite: 258]
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"> {/* [cite: 259] */}

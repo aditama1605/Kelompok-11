@@ -21,6 +21,8 @@ const DashboardAdmin = () => {
   const [activeTab, setActiveTab] = useState("terapis");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
   const [nama, setNama] = useState(localStorage.getItem("nama") || "Admin");
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -79,43 +81,46 @@ const DashboardAdmin = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const data = new FormData();
-    data.append("nama", formData.nama);
-    data.append("email", formData.email);
-    data.append("password", formData.password);
-    data.append("spesialisasi", formData.spesialisasi);
-    if (formData.foto) data.append("foto", formData.foto);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const data = new FormData();
+  data.append("nama", formData.nama);
+  data.append("email", formData.email);
+  if (formData.password) data.append("password", formData.password); // Only append password if provided
+  data.append("spesialisasi", formData.spesialisasi);
+  if (formData.foto) data.append("foto", formData.foto);
+  if (editingId) data.append("_method", "PUT"); // Add _method for updates only
 
-    try {
-      const url = editingId ? `${API_URL}/terapis/${editingId}` : `${API_URL}/terapis`;
-      const method = editingId ? "put" : "post";
-      await axios[method](url, data, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-      });
-      showToast("success", "Sukses", `Terapis ${editingId ? "diperbarui" : "ditambahkan"}`);
-      setFormData({ nama: "", email: "", password: "", spesialisasi: "", foto: null });
-      setEditingId(null);
-      setIsEditModalOpen(false);
-      const response = await axios.get(`${API_URL}/terapis`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTerapisList(response.data.data);
-    } catch (error) {
-      showToast(
-        "danger",
-        "Error",
-        error.response?.data?.message || "Gagal menyimpan data terapis"
-      );
-    }
-  };
+  try {
+    const url = editingId ? `${API_URL}/terapis/${editingId}` : `${API_URL}/terapis`;
+    const response = await axios.post(url, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    showToast("success", "Sukses", `Terapis ${editingId ? "diperbarui" : "ditambahkan"}`);
+    setFormData({ nama: "", email: "", password: "", spesialisasi: "", foto: null });
+    setEditingId(null);
+    setIsEditModalOpen(false);
+    const terapisResponse = await axios.get(`${API_URL}/terapis`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setTerapisList(terapisResponse.data.data);
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.errors
+        ? Object.values(error.response.data.errors).flat().join(", ")
+        : error.response?.data?.message || "Gagal menyimpan data terapis";
+    showToast("danger", "Error", errorMessage);
+  }
+};
 
   const handleEdit = (terapis) => {
     setFormData({
       nama: terapis.user?.nama || "",
       email: terapis.user?.email || "",
-      password: "",
+      password: "", // Password is optional for updates
       spesialisasi: terapis.spesialisasi || "",
       foto: null,
     });
@@ -123,8 +128,36 @@ const DashboardAdmin = () => {
     setIsEditModalOpen(true);
   };
 
+const handleDelete = async () => {
+  try {
+    await axios.delete(`${API_URL}/terapis/${deleteId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    showToast("success", "Sukses", "Terapis berhasil dihapus");
+    setIsDeleteModalOpen(false);
+    setDeleteId(null);
+    // Refresh terapis list
+    const response = await axios.get(`${API_URL}/terapis`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setTerapisList(response.data.data);
+  } catch (error) {
+    showToast(
+      "danger",
+      "Error",
+      error.response?.data?.message || "Gagal menghapus terapis"
+    );
+    setIsDeleteModalOpen(false);
+  }
+};
+  const openDeleteModal = (id) => {
+    setDeleteId(id);
+    setIsDeleteModalOpen(true);
+  };
+
   const getPhotoUrl = (foto) => (foto ? `${STORAGE_URL}${foto}` : "https://img.freepik.com/premium-vector/person-with-blue-shirt-that-says-name-person_1029948-7040.jpg?w=740");
 
+  
   return (
     <div className="flex h-screen bg-gray-50 font-poppins">
       {/* Sidebar */}
@@ -233,7 +266,7 @@ const DashboardAdmin = () => {
               <>
                 {/* Tambah Terapis Section */}
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-6">Tambah Terapis</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-6">{editingId ? "Edit Terapis" : "Tambah Terapis"}</h2>
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
@@ -261,14 +294,13 @@ const DashboardAdmin = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Password {editingId && "(Kosongkan jika tidak diubah)"}</label>
                         <input
                           type="password"
                           name="password"
                           value={formData.password}
                           onChange={handleInputChange}
                           className="w-full px-4 py-2 rounded-md border border-gray-200 bg-white focus:border-rose-600 focus:ring-2 focus:ring-rose-100 transition text-sm"
-                          required
                           aria-label="Password"
                         />
                       </div>
@@ -306,7 +338,7 @@ const DashboardAdmin = () => {
                         type="submit"
                         className="px-4 py-2 text-sm font-medium text-white bg-rose-600 rounded-md hover:bg-rose-700 transition"
                       >
-                        Tambah Terapis
+                        {editingId ? "Update Terapis" : "Tambah Terapis"}
                       </button>
                     </div>
                   </form>
@@ -351,12 +383,18 @@ const DashboardAdmin = () => {
                                     <span className="text-sm text-gray-500">Tidak Ada</span>
                                   )}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                <td className="px-6 py-4 whitespace-nowrap flex space-x-2">
                                   <button
                                     onClick={() => handleEdit(terapis)}
                                     className="px-4 py-2 text-sm font-medium text-white bg-rose-600 rounded-md hover:bg-rose-700 transition"
                                   >
                                     Edit
+                                  </button>
+                                  <button
+                                    onClick={() => openDeleteModal(terapis.id_terapis)}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition"
+                                  >
+                                    Hapus
                                   </button>
                                 </td>
                               </tr>
@@ -498,7 +536,7 @@ const DashboardAdmin = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Password (Kosongkan jika tidak diubah)</label>
                         <input
                           type="password"
                           name="password"
@@ -557,6 +595,37 @@ const DashboardAdmin = () => {
                       </button>
                     </div>
                   </form>
+                </div>
+              </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 sm:mx-auto shadow-lg">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Konfirmasi Hapus</h3>
+                  <p className="text-sm text-gray-600 mb-6">
+                    Apakah Anda yakin ingin menghapus terapis ini? Tindakan ini tidak dapat dibatalkan.
+                  </p>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsDeleteModalOpen(false);
+                        setDeleteId(null);
+                      }}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDelete}
+                      className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition"
+                    >
+                      Hapus
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

@@ -26,9 +26,6 @@ use App\Http\Controllers\Api\MessageController;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-Route::get('/storage/{any}', function ($any) {
-    return response()->file(storage_path('app/public/' . $any));
-})->middleware('cors');
 
 // Protected routes (require JWT authentication)
 Route::middleware('auth:api')->group(function () {

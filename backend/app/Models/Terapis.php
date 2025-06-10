@@ -19,4 +19,9 @@ class Terapis extends Model
     {
         return $this->belongsTo(User::class, 'iduser', 'iduser');
     }
+
+    public function jadwalTerapi()
+    {
+        return $this->hasMany(JadwalTerapi::class, 'id_terapis');
+    }
 }
