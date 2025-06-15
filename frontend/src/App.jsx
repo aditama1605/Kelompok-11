@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/HomePage";
+import TerapiCare from "./pages/HomePage";
 import LoginForm from "./components/LoginForm.jsx";
 import RegisterPasien from "./components/RegisterPasien.jsx";
 import RegisterTerapis from "./components/RegisterTerapis.jsx";
@@ -13,7 +13,7 @@ export default function App() {
     <BrowserRouter>
       <div className="app">
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<TerapiCare />} />
           <Route path="/login" element={<LoginForm />} />
           <Route path="/register-pasien" element={<RegisterPasien />} />
           <Route path="/register-terapis" element={<RegisterTerapis />} />

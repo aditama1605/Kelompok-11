@@ -54,7 +54,6 @@ export default function RegisterTerapis() {
 
   return (
     <div>
-      <Navbar />
       <section className="bg-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           {/* Toast Container */}
@@ -227,7 +226,6 @@ export default function RegisterTerapis() {
           </div>
         </div>
       </section>
-      <Footer />
     </div>
   );
 }
