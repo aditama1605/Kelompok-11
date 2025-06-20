@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import TerapiCare from "./pages/HomePage";
 import LoginForm from "./components/LoginForm.jsx";
 import RegisterPasien from "./components/RegisterPasien.jsx";
-import RegisterTerapis from "./components/RegisterTerapis.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import DashboardPasien from "./pages/DashboardPasien.jsx";
 import DashboardTerapis from "./pages/DashboardTerapis.jsx";
@@ -15,8 +14,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<TerapiCare />} />
           <Route path="/login" element={<LoginForm />} />
-          <Route path="/register-pasien" element={<RegisterPasien />} />
-          <Route path="/register-terapis" element={<RegisterTerapis />} />
+          <Route path="/register" element={<RegisterPasien />} />
           <Route
             path="/dashboard-admin"
             element={
