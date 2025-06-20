@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Footer from "../components/Footer";
 
 const API_URL = "http://localhost:8000/api";
 const STORAGE_URL = "http://localhost:8000/storage/";

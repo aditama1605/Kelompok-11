@@ -240,7 +240,7 @@ const TerapiCare = () => {
         <div className="flex justify-between items-center h-20">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2 z-10">
-            <span className="text-3xl font-extrabold bg-gradient-to-r from-rose-600 to-purple-600 text-gradient">
+            <span className="text-3xl font-extrabold bg-rose-600 text-gradient">
             TerapyCare
             </span>
         </Link>
@@ -278,7 +278,7 @@ const TerapiCare = () => {
             Masuk
             </Link>
             <Link
-            to="/register-pasien"
+            to="/register"
             className="px-5 py-2.5 text-sm font-medium text-white bg-rose-600 rounded-xl transition-all duration-300 shadow-md hover-scale"
             >
             Daftar
