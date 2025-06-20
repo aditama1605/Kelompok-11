@@ -120,3 +120,15 @@ Di era digital, masih banyak masyarakat mengalami kesulitan dalam mengakses laya
 - Make sure backend and frontend run on different ports.
 - Change the API endpoint configuration in the frontend if needed.
 - For JWT, ensure the `JWT_SECRET` variable in the backend `.env` file is set.
+
+---
+### 👥 Meet Our Extraordinary Team 11
+
+
+| ID         | Name                  | Campus                               | GitHub Profile                                |
+|------------|-----------------------|--------------------------------------|-----------------------------------------------|
+| FWD02023   | Zidan Ibadurrahman    | STT Terpadu Nurul Fikri              | [Zibad12](https://github.com/Zibad12)         |
+| FWD02103   | Nisa Kris Cahyani     | Politeknik Negeri Banyuwangi         | [nisakris](https://github.com/nisakris)       |
+| FWD02105   | M. Albi Mustakim      | Universitas Bhayangkara Jakarta Raya | [albimst](https://github.com/albimst)         |
+| FWD02107   | Adi Indra Pratama     | Universitas Negeri Surabaya          | [aditama1605](https://github.com/aditama1605) |
+| FWD02109   | Muhammad Zikri        | Universitas Muhammadiyah Jakarta     | [Mu-jikri](https://github.com/Mu-jikri)       |
