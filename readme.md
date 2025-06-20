@@ -1,37 +1,4 @@
-<<<<<<< HEAD
-# 🧠 TerapyApp - Mental Health Platform
-
-![Project Banner](https://placehold.co/1200x400/4F46E5/FFFFFF?text=TerapyApp) <!-- Replace with actual banner image -->
-
-A comprehensive mental health platform featuring therapy sessions, mood tracking, and real-time chat support.
-
-## 🚀 Features
-
-- **User Authentication** (JWT secured)
-- **Therapy Session Management**
-- **Real-time Chat** (Socket.IO)
-- **Mood & Activity Tracking**
-- **Admin Dashboard**
-- **Responsive Frontend** (Vue.js/React)
-
-## 🛠 Tech Stack
-
-**Backend**:
-![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
-![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
-
-**Frontend**:
-![Vue.js](https://img.shields.io/badge/Vue.js-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-
-**Real-time**:
-![Socket.IO](https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socketdotio&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-
-=======
 ![TerapyApp Banner](https://placehold.co/1200x400/4F46E5/FFFFFF?text=TerapyCare)
->>>>>>> 1a3a45088fef8a52f3fb467f11783e48b5366693
 
 <p align="center">
   <a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel"></a>
@@ -131,11 +98,7 @@ Di era digital, masih banyak masyarakat mengalami kesulitan dalam mengakses laya
    ```
 
 
-<<<<<<< HEAD
-## ServerChat Installation (Node.js + Socket.IO)
-=======
 ### ServerChat Installation (Node.js + Socket.IO)
->>>>>>> 1a3a45088fef8a52f3fb467f11783e48b5366693
 
 1. **Navigate to the ServerChat folder**
    ```bash
@@ -152,24 +115,13 @@ Di era digital, masih banyak masyarakat mengalami kesulitan dalam mengakses laya
    node server.js
    ```
 
-<<<<<<< HEAD
----
-
-## Notes
-=======
 ### 📝 **Notes**
->>>>>>> 1a3a45088fef8a52f3fb467f11783e48b5366693
 
-- Make sure backend, frontend, and ServerChat run on different ports.
+- Make sure backend and frontend run on different ports.
 - Change the API endpoint configuration in the frontend if needed.
 - For JWT, ensure the `JWT_SECRET` variable in the backend `.env` file is set.
-- If using Laragon, you can manage services easily via the Laragon dashboard.
 
 ---
-<<<<<<< HEAD
-
-Selamat mencoba!
-=======
 ### 👥 Meet Our Extraordinary Team 11
 
 
@@ -180,4 +132,3 @@ Selamat mencoba!
 | FWD02105   | M. Albi Mustakim      | Universitas Bhayangkara Jakarta Raya | [albimst](https://github.com/albimst)         |
 | FWD02107   | Adi Indra Pratama     | Universitas Negeri Surabaya          | [aditama1605](https://github.com/aditama1605) |
 | FWD02109   | Muhammad Zikri        | Universitas Muhammadiyah Jakarta     | [Mu-jikri](https://github.com/Mu-jikri)       |
->>>>>>> 1a3a45088fef8a52f3fb467f11783e48b5366693
